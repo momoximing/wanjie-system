@@ -34,7 +34,7 @@ git push -u origin main
 
 以后每次 push 到 main 都会自动重新部署。在线版是纯静态前端 + localStorage，别人点开即可体验录入流程（不含服务端/模型网关，没有密钥风险）。
 
-把这个链接填进 `README.md` 顶部的「在线体验」占位处，并替换截图链接里的 `你的用户名`。
+把这个链接填进 `README.md` 顶部的「在线体验」处即可（本仓库已预填为 `momoximing.github.io/wanjie-system`）。
 
 ## 三、仓库元信息（影响被搜到）
 
@@ -43,7 +43,7 @@ Settings → General 里填：
 - **Description**：`从零记录的个人 Agent · 说话即录入 · 规则校验 · 你点头才落盘 · 本机 Docker + 模型中心`
 - **Topics**（加号逐个加）：`agent` `knowledge-graph` `note-taking` `second-brain` `local-first` `docker` `chinese` `mind-map` `personal-knowledge-management`
 
-README 顶部的徽章、截图链接里的 `你的用户名` 记得全部替换。
+仓库元信息（Description / Topics）按上面第三节填好即可；截图已用相对路径，不需要替换用户名。
 
 ## 四、让别人看到（按性价比排序）
 
