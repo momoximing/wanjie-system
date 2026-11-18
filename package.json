@@ -1,0 +1,13 @@
+{
+  "name": "wanjie",
+  "version": "1.0.0",
+  "private": true,
+  "description": "万界系统 · 从零记录的个人 Agent（本机 Docker + 模型中心 + 数据落卷）",
+  "scripts": {
+    "start": "node ai-proxy.js",
+    "test": "node test/run-tests.js",
+    "eval": "node test/eval-model.js"
+  },
+  "license": "MIT",
+  "engines": { "node": ">=18" }
+}

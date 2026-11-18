@@ -1,0 +1,29 @@
+# 万界系统 · 本机一键启动
+# 用法：docker compose up -d  然后浏览器打开 http://localhost:8787
+# 数据落在宿主机 ./data 目录，删容器不丢。
+
+services:
+  wanjie:
+    build: .
+    image: wanjie:local
+    container_name: wanjie
+    # 端口映射到宿主机 8787；若被占用，改成 "8788:8787" 并同步改 .env 的 PORT
+    ports:
+      - "8787:8787"
+    # 数据落卷：左边是宿主机目录，右边是容器内数据目录
+    volumes:
+      - ./data:/app/data
+    # 从 .env 读取可选配置（模型密钥等；也可在网页「模型中心」里填）
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      - WANJIE_DATA_DIR=/app/data
+      - PORT=8787
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8787/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s

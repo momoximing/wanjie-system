@@ -1,0 +1,25 @@
+# 版本控制忽略
+# 运行时数据：db.json（记录）+ models.json（含密钥），绝不入库
+data/
+# 旧位置模型配置（含密钥）
+models.json
+# 本地环境变量（含密钥）
+.env
+node_modules/
+*.log
+.DS_Store
+*.tmp.*
+_test*.js
+_selftest.html
+_openshot.html
+_drawershot.html
+_evshot.html
+_mc*.html
+_mkmc*.js
+# 截图、审核材料与临时目录，仅本地留档
+preview/
+review/
+.tmpm/
+# 回并前快照与分支对照，本地回滚用
+*.backup-*.html
+index-A*.html
