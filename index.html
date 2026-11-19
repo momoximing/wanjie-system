@@ -939,7 +939,8 @@ body,.topbar,.sidebar,.main,.dock,.panel,.set-block,.kpi,.file-card,.rec{transit
   #view-map.on{height:auto;min-height:0;display:block}
   #mapShell{height:auto;flex:none;overflow:visible;background:var(--panel2);cursor:default}
   #starCanvas,.nebula,.grain,.axon-layer,.layer-tag,.layer-rule,.map-tools,.map-hint,.n-tip{display:none}
-  #mapCanvas{width:100%!important;height:auto!important;display:flex;flex-direction:column;align-items:stretch;gap:0;transform:none!important;padding:8px 10px}
+  /* 顶部给系统提醒徽标+层图例留出独立带，避免竖排第一行被压住；滚到顶能完整露出第一行 */
+  #mapCanvas{width:100%!important;height:auto!important;display:flex;flex-direction:column;align-items:stretch;gap:0;transform:none!important;padding:90px 10px 8px}
   .neuron{position:relative!important;left:auto!important;top:auto!important;transform:none;width:100%;
     flex-direction:row;gap:12px;text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);cursor:pointer}
   .neuron:last-child{border-bottom:0}
@@ -1169,6 +1170,13 @@ button.dock-model:disabled{opacity:.7;cursor:default}
 .dock-hint{padding:8px 6px 0;opacity:.72}
 /* 空态卡：左下对齐、方角、去掉居中毛玻璃 */
 .empty-guide{place-items:end start;padding:0 0 22px 24px}
+/* 首屏引导与悬浮 dock 分层：宽屏下 dock 固定占底部约 135px，卡片抬到它之上，
+   否则「示例语句 / 用演示数据看看」会被"新对话"条和输入框盖住。窄屏由 .main 的 180px 留白承接，不叠加。 */
+@media(min-width:821px){
+  body.map-view .empty-guide{padding-bottom:150px}
+  /* 极矮窗口下卡片也只占 dock 之上的空间，超出就内部滚动，绝不压到对话框 */
+  body.map-view .eg-card{max-height:100%;overflow:auto}
+}
 .eg-card{width:min(380px,84%);text-align:left;padding:18px 20px 16px;
   border:1px solid var(--line);border-radius:2px;background:var(--panel);
   box-shadow:none;backdrop-filter:none}
@@ -1220,8 +1228,8 @@ button.dock-model:disabled{opacity:.7;cursor:default}
     border:1px solid var(--line);border-radius:11px;
     padding:7px 10px;margin-bottom:7px;
     box-shadow:0 4px 18px -10px rgba(0,0,0,.5)}
-  /* 竖排内容需要能滚到 dock 之上：留白 = dock 高度 + 余量，不再被悬浮框永久盖住 */
-  body.map-view .main{padding-bottom:180px}
+  /* 竖排内容需要能滚到 dock 之上：留白 = dock 实际高度 + 余量，dock 变高（聊天展开）时由 JS 更新 --dock-h */
+  body.map-view .main{padding-bottom:calc(var(--dock-h,180px) + 24px)}
 }
 /* ============ 减法 & 收敛：文案瘦身配套 + 药丸收敛 ============ */
 /* 设置向导折进 details：summary 做成安静的可点标题 */
@@ -2670,6 +2678,8 @@ function renderChat(){
       '<div class="bubble">'+esc(m.content)+tools+'</div></div>';
   }).join('');
   th.scrollTop=th.scrollHeight;
+  // dock 高度随对话增减，同步给窄屏竖排的底部留白，保证最后一行能滚出来
+  if(window.__syncDockH) window.__syncDockH();
   // 同步到当前会话 + DB.chat 镜像 + 追问状态，刷新后可恢复
   syncSession(); DB.filling=FILLING; save();
   renderSessions();
@@ -4654,6 +4664,17 @@ refreshDockModelSel(); // 本地双击模式也立刻显示占位项，不让下
   }
   if(window.__storeStatus) window.__storeStatus();
   if(res.migrated && window.toast) toast('本机数据已上传到服务端数据卷');
+})();
+
+/* 窄屏竖排：让 .main 底部留白跟随 dock 实际高度（聊天展开会变高），
+   保证最后一行总能滚到 dock 之上露出；宽屏画布不滚，不受影响。 */
+(function(){
+  const dock=$('.dock'); if(!dock) return;
+  const sync=()=>{ document.documentElement.style.setProperty('--dock-h',Math.ceil(dock.getBoundingClientRect().height)+'px'); };
+  window.__syncDockH=sync;
+  sync();
+  if(window.ResizeObserver){ new ResizeObserver(sync).observe(dock); }
+  else window.addEventListener('resize',sync);
 })();
 
 /* 观测台：日冕光斑跟随鼠标（仅图谱页，纯增量，不碰任何既有逻辑） */
