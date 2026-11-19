@@ -1113,6 +1113,15 @@ button.dock-model:disabled{opacity:.7;cursor:default}
 .eg-card h2{font-size:var(--fs-4);font-weight:600}
 .eg-card p{font-size:var(--fs-2);line-height:1.75}
 .eg-actions{justify-content:flex-start}
+/* v2 首屏引导：可点示范句 + 右上角收起 */
+.eg-card{position:relative}
+.eg-x{position:absolute;top:10px;right:12px;border:0;background:transparent;color:var(--dim);font-size:19px;line-height:1;cursor:pointer;padding:2px 6px}
+.eg-x:hover{color:var(--txt)}
+.eg-try-line{display:block;width:100%;margin:2px 0 14px;padding:11px 13px;text-align:left;
+  border:1px solid var(--accent);border-radius:2px;background:var(--accent-soft);
+  color:var(--txt);font:13px/1.65 inherit;cursor:pointer;transition:transform .16s ease,border-color .16s ease}
+.eg-try-line:hover{transform:translateY(-1px);border-color:var(--accent)}
+.eg-try-line::before{content:'▸ ';color:var(--accent)}
 
 /* 2) 发送键：方角、透明底、有输入才反白点亮（:has 无需 JS，主题自适应） */
 .dock-send{
@@ -1260,14 +1269,15 @@ body.map-view #view-map::before{
           </svg>
           <div class="layer-rule" style="left:34px;top:492px;width:720px"></div>
         </div>
-        <!-- 首次使用空态引导：13 区全空时盖在画布上 -->
+        <!-- 首次使用引导：新访客首屏显示一次，点示范句即可上手 -->
         <div class="empty-guide" id="emptyGuide" hidden>
           <div class="eg-card">
-            <h2>画布是空的</h2>
-            <p>说一句，它就记下。写错了撤销。</p>
+            <button class="eg-x" id="egClose" title="收起引导" aria-label="收起引导">×</button>
+            <h2>说一句，它就长出来</h2>
+            <p>你只管说话——它追问、起草、过一遍规矩，<b>你点头才算数</b>。<br>点下面这句，走一遍：</p>
+            <button class="eg-try-line" id="egTry">「睡了 7 小时，注意力最好 8 最差 3，情绪平静，焦虑 3/2，原因：赶稿」</button>
             <div class="eg-actions">
-              <button class="btn" id="egTry">试一句</button>
-              <button class="btn gray" id="egDemo">用演示数据</button>
+              <button class="btn gray" id="egDemo">用演示数据看看</button>
             </div>
           </div>
         </div>
@@ -3401,8 +3411,12 @@ function renderAll(){ renderSidebar();renderMap();renderDrawer();renderBoard();r
 /* 空态引导：13 区全空时显示，给新人明确的第一步 */
 function renderEmptyGuide(){
   const g=$('#emptyGuide'); if(!g) return;
-  const total=MODULES.reduce((s,m)=>s+(Array.isArray(DB[m.id])?DB[m.id].length:0),0);
-  g.hidden=total>0;
+  // v2：新访客首次打开显示一次（有种子数据也要给引导），用独立标记记住，不碰 DB 结构
+  let seen=false; try{ seen=localStorage.getItem('wanjie.guide.v2')==='1'; }catch(e){}
+  g.hidden=seen;
+}
+function dismissGuide(){ try{ localStorage.setItem('wanjie.guide.v2','1'); }catch(e){}
+  const g=$('#emptyGuide'); if(g) g.hidden=true;
 }
 
 /* ---------- 6. 写入流程 ---------- */
@@ -3437,6 +3451,7 @@ function commit(){
   if(!n && !mw){ $('#pending').hidden=true; PENDING=null; return; }
   // 撤销快照：记录每个受影响模块写入前的长度 + 记忆块旧值
   const before={}; (PENDING.ops||[]).forEach(o=>{ if(M[o.m]&&before[o.m]===undefined) before[o.m]=DB[o.m].length; });
+  const firstMods=[...new Set((PENDING.ops||[]).map(o=>o.m))].filter(m=>M[m]);  // v2 首次反馈用，PENDING 清零前先存
   const memBefore=mw?DB.memory[mw.block]:null;
   (PENDING.ops||[]).forEach(o=>{ if(M[o.m]) DB[o.m].push(o.rec); });
   if(mw){
@@ -3445,7 +3460,16 @@ function commit(){
   }
   save(); $('#pending').hidden=true; PENDING=null;
   const label=mw&&!n? '记住了 1 条 · 存于本机' : '✓ 已写入 '+n+' 条 · 存于本机';
-  CHAT.push({role:'sys',content:label}); renderChat();
+  CHAT.push({role:'sys',content:label});
+  // v2 首次落盘：告诉新人刚才发生了什么、去哪看，闭环才算走完（独立标记，不碰 DB）
+  let landed=false; try{ landed=localStorage.getItem('wanjie.landed.v2')==='1'; }catch(e){}
+  if(!landed){
+    try{ localStorage.setItem('wanjie.landed.v2','1'); }catch(e){}
+    const mods=firstMods;
+    const where=mods.length? mods.map(m=>M[m].name).join('、') : '记忆';
+    CHAT.push({role:'sys',content:'看，'+where+' 的数字动了——这就是它记住的。图谱上那个胞体亮了一格，点开就能看到你刚说的。往下继续说，它会慢慢长出你的样子。'});
+  }
+  renderChat();
   renderAll();
   toast(label,'撤销',()=>{
     Object.keys(before).forEach(m=>{ if(Array.isArray(DB[m])&&DB[m].length>before[m]) DB[m].length=before[m]; });
@@ -3737,8 +3761,9 @@ document.addEventListener('click',e=>{
   if(e.target.closest('#importBtn')){ $('#importFile').click(); return; }
   if(e.target.closest('#egTry')){
     const q=QUICK[0]; if(q){ $('#dockInput').value=q.t; $('#dockInput').focus(); }
-    $('#emptyGuide').hidden=true; toast('已填好一句示例 · 点发送看看'); return;
+    dismissGuide(); toast('句子填好了 · 点右边箭头发送，看看它怎么问你'); return;
   }
+  if(e.target.closest('#egClose')){ dismissGuide(); return; }
   if(e.target.closest('#egDemo')){
     if(confirm('载入演示数据会覆盖当前（空）记录，确定？')){ backupCurrent('载入演示前'); DB=seed(); save(); renderAll(); renderChat(); toast('演示数据已载入'); }
     return;
@@ -3907,6 +3932,7 @@ async function sendDock(){
   const files=ATTACHMENTS.slice();
   inp.value='';
   $('#pending').hidden=true; PENDING=null;
+  dismissGuide();  // 用户已开口，引导功成身退（首次发送自动收起）
   CHAT.push({role:'user',content:t,ts:new Date().toISOString()});
   if(billable){
     DB.settings.quotaUsed++; save();
