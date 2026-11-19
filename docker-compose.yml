@@ -20,6 +20,9 @@ services:
     environment:
       - WANJIE_DATA_DIR=/app/data
       - PORT=8787
+      # 容器内必须监听所有网卡，端口映射才能通；靠容器网络边界隔离（未发布到公网）
+      - WANJIE_HOST=0.0.0.0
+    # 可选访问令牌：如需给接口加一层凭证，在 .env 里设 WANJIE_TOKEN=任意字符串
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:8787/health"]

@@ -280,6 +280,20 @@ body.map-view .main{padding-bottom:10px}
 .panel{border:1px solid var(--line);border-radius:11px;background:var(--panel);box-shadow:var(--shadow);padding:18px}
 .panel h3{margin:0 0 14px;font-size:14px;font-family:var(--title-font);display:flex;align-items:center;gap:9px}
 .panel h3::before{content:'';width:3px;height:14px;border-radius:2px;background:var(--accent)}
+/* P1-3 预测校准看板 */
+.calib-sum{font-size:12.5px;color:var(--dim);margin:0 0 10px}
+.calib-sum b{color:var(--txt);font-weight:700}
+.calib-svg{display:block;overflow:visible}
+.calib-lb{fill:var(--dim);font-size:11px}
+.calib-v{fill:var(--txt);font-size:11px;font-weight:700}
+.calib-n{fill:var(--dim);font-size:9px;opacity:.7}
+.calib-note,.calib-empty{font-size:11.5px;color:var(--dim);line-height:1.7;margin:9px 0 0}
+/* P1-6 记忆健康度 */
+.hgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.hc{border:1px solid var(--line);border-radius:9px;padding:11px 12px;background:var(--panel2)}
+.hv{font-size:22px;font-weight:700;font-family:var(--title-font);color:var(--txt);line-height:1.1}
+.hl{font-size:11.5px;color:var(--txt);margin-top:4px;font-weight:600}
+.ht{font-size:10px;color:var(--dim);margin-top:3px;line-height:1.5}
 .gap-item{border-left:3px solid var(--c4);background:var(--danger-bg);color:var(--danger-txt);
           border-radius:var(--radius);padding:10px 12px;margin-bottom:9px;font-size:12.5px}
 .gap-item b{display:block;margin-bottom:3px;font-size:13px}
@@ -321,6 +335,10 @@ body.map-view .main{padding-bottom:10px}
   border-radius:20px;padding:3px 10px;cursor:pointer;transition:all .16s}
 .sf-chip:hover{border-color:var(--accent);color:var(--txt)}
 .sf-chip.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.dom-row{display:flex;gap:6px;flex-wrap:wrap;align-items:center;width:100%;margin-top:4px;padding-top:6px;border-top:1px dashed var(--line)}
+.sf-sep{font-size:10.5px;color:var(--dim)}
+.domain-tags{margin-top:7px;display:flex;gap:5px;flex-wrap:wrap}
+.domain-tag{font-size:10.5px;color:var(--dim);border:1px solid var(--line);border-radius:12px;padding:2px 8px;background:var(--panel2)}
 .search-meta{font-size:11.5px;color:var(--dim);margin:0 0 8px}
 .search-results{display:flex;flex-direction:column;gap:7px;margin-bottom:20px}
 .sr-item{border:1px solid var(--line);border-radius:9px;background:var(--panel);padding:10px 12px;
@@ -417,6 +435,24 @@ select.dock-model:hover,select.dock-model:focus{color:var(--accent);border-color
 .pending .p-line b{color:var(--txt);font-weight:600}
 .pending .p-actions{display:flex;gap:8px;margin-top:11px;align-items:center}
 .pending .p-note{font-size:11.5px;color:var(--dim);margin-left:auto}
+/* P1-1 风险分级确认：低风险清单批勾 / 高风险逐条精审 */
+.pending .p-hint{font-size:11.5px;color:var(--dim);line-height:1.6;margin:-4px 0 9px}
+.pending .p-group{border:1px solid var(--line);border-radius:8px;padding:8px 9px;margin:8px 0;background:var(--panel2)}
+.pending .p-group.p-high{border-color:color-mix(in srgb,var(--accent) 34%,var(--line))}
+.pending .p-group-h{display:flex;align-items:center;gap:8px;font-size:11.5px;font-weight:600;color:var(--dim);margin-bottom:6px}
+.pending .p-all{margin-left:auto;font-size:10.5px;color:var(--accent);background:none;border:0;cursor:pointer;padding:2px 4px}
+.pending .p-item{display:flex;gap:8px;align-items:flex-start;font-size:12px;color:var(--dim);line-height:1.6;
+  padding:6px 4px;border-top:1px solid var(--line);cursor:pointer}
+.pending .p-item:first-of-type{border-top:0}
+.pending .p-chk{flex:none;margin-top:2px;accent-color:var(--accent);cursor:pointer;width:14px;height:14px}
+.pending .p-item-b{flex:1;min-width:0;word-break:break-word}
+.pending .p-item-b b{color:var(--txt);font-weight:600}
+.pending .pf-key{color:var(--txt);font-weight:600;background:color-mix(in srgb,var(--accent) 12%,transparent);
+  padding:1px 4px;border-radius:4px;white-space:nowrap}
+.pending .p-warn{display:block;color:#c9a227;font-size:11px;margin-top:3px}
+.pending .p-item.p-bad{opacity:.72;cursor:not-allowed}
+.pending .p-bad-tag{color:var(--c4);font-size:10.5px;font-weight:600;white-space:nowrap}
+.pending .p-item .alert{margin:4px 0 0;display:block}
 .toast{position:fixed;left:50%;bottom:110px;transform:translateX(-50%);background:var(--txt);color:var(--bg);
        border-radius:var(--radius);padding:9px 16px;font-size:12.5px;z-index:90;opacity:0;transition:opacity .2s;pointer-events:none}
 .toast.on{opacity:1}
@@ -464,6 +500,27 @@ select.dock-model:hover,select.dock-model:focus{color:var(--accent);border-color
 .ev-chip .ev-m{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10px;opacity:.75}
 .ev-chip.broken{color:var(--c4);border-color:var(--c4);background:var(--danger-bg)}
 .ev-none{font-size:11.5px;color:var(--c4);border:1px dashed var(--c4);border-radius:6px;padding:5px 9px;display:inline-block}
+/* P1-5 版本与冲突 */
+.vc-chain{margin-top:9px;padding-top:8px;border-top:1px dashed var(--line)}
+.vc-chain .ev-h::before{content:'⟲';color:var(--dim)}
+.vc-date{font-size:10.5px;color:var(--dim);margin-bottom:6px}
+.vc-row{display:flex;flex-wrap:wrap;align-items:center;gap:5px;margin:5px 0}
+.vc-lb{font-size:11px;color:var(--dim);width:100%}
+.vc-chip{font-size:11px;color:var(--dim);border:1px solid var(--line);border-radius:6px;padding:3px 8px;cursor:pointer;transition:.14s}
+.vc-chip:hover{color:var(--accent);border-color:var(--accent)}
+.vc-none{font-size:11px;color:var(--dim);opacity:.6}
+/* P2-3 认知体检简报 */
+.checkup-btn{width:100%;border:1px dashed var(--accent);background:var(--accent-soft);color:var(--accent);
+  border-radius:8px;padding:9px 12px;font-size:12.5px;font-weight:600;cursor:pointer;transition:.16s}
+.checkup-btn:hover{background:var(--accent);color:#fff}
+.checkup-report{margin-top:11px}
+.checkup-time{font-size:10.5px;color:var(--dim);margin-bottom:8px}
+.checkup-item{border-left:3px solid var(--line);padding:7px 10px;margin-bottom:7px;background:var(--panel2);border-radius:6px}
+.checkup-item.warn{border-left-color:var(--c4)}
+.checkup-item.info{border-left-color:var(--accent)}
+.checkup-item.ok{border-left-color:var(--c2)}
+.checkup-item b{display:block;font-size:12px;color:var(--txt)}
+.checkup-item small{display:block;font-size:11px;color:var(--dim);line-height:1.6;margin-top:3px}
 .distill-btn{margin-top:11px;width:100%;border:1px dashed var(--c4);background:var(--danger-bg);color:var(--c4);
   border-radius:8px;padding:9px 12px;font-size:12.5px;font-weight:600;transition:.16s var(--ease)}
 .distill-btn:hover:not(:disabled){border-style:solid;background:var(--c4);color:#fff;box-shadow:0 4px 14px rgba(240,90,80,.3)}
@@ -471,9 +528,10 @@ select.dock-model:hover,select.dock-model:focus{color:var(--accent);border-color
 .distill-btn.ready:hover{background:var(--c2);color:#fff;box-shadow:0 4px 14px rgba(74,160,110,.3)}
 .distill-btn:disabled{opacity:.5;cursor:not-allowed}
 
+/* 磨砂铭牌：提高到近实底 + 轻模糊，压住背后节点标题，不加大阴影大圆角 */
 .alert-badge{position:absolute;left:14px;top:13px;z-index:11;display:flex;align-items:center;gap:7px;
-  border:1px solid rgba(120,150,190,.28);background:rgba(8,16,30,.82);color:#b9c6d8;border-radius:20px;
-  padding:5px 11px;font-size:11px;font-weight:500;cursor:pointer;backdrop-filter:blur(5px);
+  border:1px solid rgba(150,180,220,.38);background:rgba(8,16,30,.94);color:#b9c6d8;border-radius:20px;
+  padding:5px 11px;font-size:11px;font-weight:500;cursor:pointer;backdrop-filter:blur(8px);
   box-shadow:0 2px 10px rgba(0,0,0,.25);transition:.16s var(--ease)}
 .alert-badge:hover{border-color:rgba(150,180,220,.5);color:#e6edf3}
 .alert-badge .ab-dot{width:6px;height:6px;border-radius:50%;background:#c9a06a;opacity:.9}
@@ -561,7 +619,10 @@ body.side-open .side-toggle{color:var(--accent);border-color:var(--accent);backg
 
 /* ========== Agent 对话流 ========== */
 .chat-thread{max-height:232px;overflow-y:auto;display:none;flex-direction:column;gap:9px;padding:2px 2px 8px;margin-bottom:4px}
-.chat-thread.on{display:flex}
+.chat-thread.on{display:flex;padding:11px 12px 9px;margin-bottom:9px;
+  background:color-mix(in srgb,var(--panel) 94%,transparent);
+  border:1px solid var(--line);border-radius:12px;
+  box-shadow:0 10px 34px -20px rgba(0,0,0,.72)}
 .chat-thread::-webkit-scrollbar{width:5px}
 .chat-thread::-webkit-scrollbar-thumb{background:var(--line);border-radius:3px}
 .msg{display:flex;gap:8px;max-width:88%;line-height:1.6}
@@ -1194,10 +1255,44 @@ body.map-view #view-map::before{
 /* 层图例：让节点配色可被翻译 */
 .map-legend{position:absolute;left:16px;top:54px;z-index:6;display:flex;gap:13px;pointer-events:none;
   font:11px/1 ui-monospace,Menlo,Consolas,monospace;color:var(--dim);letter-spacing:.5px;
-  padding:6px 10px;background:color-mix(in srgb,var(--bg) 78%,transparent);border:1px solid var(--line);border-radius:2px}
+  padding:6px 10px;background:color-mix(in srgb,var(--bg) 94%,transparent);backdrop-filter:blur(6px);
+  border:1px solid var(--line);border-radius:2px}
 .map-legend span{display:inline-flex;align-items:center;gap:5px}
 .map-legend i{width:7px;height:7px;border-radius:50%;background:var(--lc);display:inline-block;opacity:.9}
 .map-legend b{font-weight:600;color:#aab1bb;margin-right:3px}
+/* P2-2 只读辅助视图 */
+.map-tools-sep{width:1px;height:16px;background:var(--line);margin:0 2px}
+.map-mode-btn.on{color:var(--accent);background:var(--accent-soft);border-color:var(--accent)}
+.map-alt-view{position:absolute;inset:0;z-index:8;overflow:auto;padding:18px 22px 30px;
+  background:color-mix(in srgb,var(--panel2) 96%,transparent);backdrop-filter:blur(8px)}
+.mav-head{display:flex;align-items:center;gap:14px}
+.mav-head h3{margin:0;font-size:15px;font-family:var(--title-font)}
+.mav-back{margin-left:auto;font-size:11.5px;color:var(--accent);background:none;border:1px solid var(--line);
+  border-radius:16px;padding:5px 12px;cursor:pointer}
+.mav-tip{font-size:11.5px;color:var(--dim);line-height:1.7;margin:8px 0 14px}
+.mav-none{font-size:12px;color:var(--dim);opacity:.75}
+.mav-picker{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--line)}
+.mav-pick-lb{font-size:11px;color:var(--dim)}
+.mav-pick{font-size:11px;border:1px solid var(--line);background:var(--panel);color:var(--dim);
+  border-radius:14px;padding:4px 9px;cursor:pointer}
+.mav-pick.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.mav-flow{display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap}
+.mav-col{flex:1;min-width:150px;display:flex;flex-direction:column;gap:8px}
+.mav-col-h{font-size:11px;color:var(--dim);padding-bottom:6px;border-bottom:1px dashed var(--line)}
+.mav-arrows{color:var(--accent);font-size:14px;align-self:center;opacity:.6;padding:0 4px}
+.mav-node{border:1px solid var(--line);border-radius:9px;padding:10px 12px;cursor:pointer;background:var(--panel);transition:.15s}
+.mav-node:hover{border-color:var(--accent);transform:translateY(-1px)}
+.mav-node b{display:block;font-size:12.5px;color:var(--txt)}
+.mav-node span{display:block;font-size:11px;color:var(--dim);margin-top:3px;word-break:break-word}
+.mav-node.focus{border-color:var(--accent);background:var(--accent-soft)}
+.mav-node.up{border-left:3px solid var(--c2)}
+.mav-node.down{border-left:3px solid var(--c4)}
+.mav-note{font-size:11px;color:var(--dim);margin-top:18px;line-height:1.7}
+.matrix-table{width:100%;border-collapse:collapse;font-size:11.5px}
+.matrix-table th,.matrix-table td{border:1px solid var(--line);padding:6px 8px;text-align:center}
+.matrix-table th{color:var(--dim);font-weight:600;background:var(--panel);position:sticky;left:0}
+.matrix-table thead th{position:static}
+.matrix-table td{color:var(--txt);min-width:38px}
 /* 顶栏/工具图标：统一 stroke 语言 */
 .ico>svg,.map-tools button>svg{width:17px;height:17px;fill:none;stroke:currentColor;
   stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;display:block}
@@ -1242,6 +1337,9 @@ body.map-view #view-map::before{
           <button id="layoutBtn" title="整理布局" aria-label="整理布局"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/><circle cx="9" cy="7" r="2"/><circle cx="15" cy="12" r="2"/><circle cx="8" cy="17" r="2"/></svg></button>
           <button id="layoutReset" title="节点回到默认位置" aria-label="复位布局"><svg viewBox="0 0 24 24"><path d="M4 11a8 8 0 1 1 2.3 6M4 5v6h6"/></svg></button>
           <button id="zoomReset" title="复位视图" aria-label="复位视图"><svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 8-8M4 6v6h6"/></svg></button>
+          <span class="map-tools-sep"></span>
+          <button id="viewEvidence" class="map-mode-btn" title="证据链聚焦子图" aria-label="证据链聚焦子图"><svg viewBox="0 0 24 24"><circle cx="6" cy="12" r="2"/><circle cx="18" cy="6" r="2"/><circle cx="18" cy="18" r="2"/><path d="M8 11l8-4M8 13l8 4"/></svg></button>
+          <button id="viewMatrix" class="map-mode-btn" title="层级×时间矩阵" aria-label="层级时间矩阵"><svg viewBox="0 0 24 24"><path d="M4 4h16v16H4zM4 9h16M4 14h16M9 4v16M14 4v16"/></svg></button>
         </div>
         <!-- 层图例：让节点配色可被翻译 -->
         <div class="map-legend" aria-label="层级配色图例">
@@ -1270,6 +1368,20 @@ body.map-view #view-map::before{
           </svg>
           <div class="layer-rule" style="left:34px;top:492px;width:720px"></div>
         </div>
+        <!-- P2-2 只读辅助视图：证据链聚焦子图 / 层级×时间矩阵 -->
+        <div class="map-alt-view" id="evSubgraph" hidden>
+          <div class="mav-head"><h3>证据链聚焦 · 一条判断的来龙去脉</h3>
+            <button class="mav-back" id="mavBack">← 回神经元</button></div>
+          <p class="mav-tip">点一条有证据链的记录，只看它和它的上下游——大图谱乱成毛球时，用它理清一条线。</p>
+          <div class="mav-picker" id="evPicker"></div>
+          <div class="mav-canvas" id="evCanvas"></div>
+        </div>
+        <div class="map-alt-view" id="timeMatrix" hidden>
+          <div class="mav-head"><h3>层级 × 时间 · 一百条以上时的紧凑视图</h3>
+            <button class="mav-back" id="mavBack2">← 回神经元</button></div>
+          <p class="mav-tip">每一格是一个月里新增的条数。看得清哪层在长、哪层一直空——比数节点快。</p>
+          <div class="mav-canvas" id="matrixCanvas"></div>
+        </div>
         <!-- 首次使用引导：新访客首屏显示一次，点示范句即可上手 -->
         <div class="empty-guide" id="emptyGuide" hidden>
           <div class="eg-card">
@@ -1296,6 +1408,8 @@ body.map-view #view-map::before{
           <div class="d-sec">审计存根</div><div id="auditList"></div>
         </div>
       </div>
+      <div class="panel calib-panel" id="calibPanel" style="margin-top:14px"><h3>预测校准 · 我说话准不准</h3><div id="calibBody"></div></div>
+      <div class="panel health-panel" id="healthPanel" style="margin-top:14px"><h3>系统健康度 · 它到底有没有在帮我</h3><div id="healthBody"></div></div>
     </section>
 
     <!-- 档案 -->
@@ -1516,10 +1630,10 @@ const MODULES = [
    fields:[{k:'date',l:'日期',t:'date'},{k:'sleep',l:'睡眠(小时)'},{k:'attn',l:'注意力 最好/最差',ph:'8/3'},
            {k:'mood',l:'情绪(一个词)'},{k:'anx',l:'焦虑 早/午',ph:'3/2'},{k:'reason',l:'原因(≤12字)'},{k:'hard',l:'可选硬约束'}]},
   {id:'L1',   name:'L1 自我说明书',  layer:'事实层', c:'c1', x:284, y:30,
-   desc:'七维：价值排序 / 能量与恢复 / 边界与互惠 / 亲密与安全感 / 自我价值锚点 / 应对与防御 / 启动与完成。每季只改一句。',
+   desc:'七维：价值排序 / 能量与恢复 / 边界与互惠 / 亲密与安全感 / 自我价值锚点 / 应对与防御 / 启动与完成。一次只改一句，不许整体重写。',
    fields:[{k:'dim',l:'维度'},{k:'text',l:'内容',t:'textarea'},{k:'ver',l:'版本'}]},
   {id:'VERIFY',name:'L1 外部验收人', layer:'事实层', c:'c4', x:284, y:150, gap:true,
-   desc:'一个敢当面说「你这句美化了」的真人。不能是你自己，不能是任何 AI。每季问一次。',
+   desc:'一个敢当面说「你这句美化了」的真人。不能是你自己，不能是任何 AI。多久问一次由你定，问过记在 askedAt。',
    fields:[{k:'name',l:'姓名'},{k:'why',l:'为什么是他'},{k:'askedAt',l:'本季询问日',t:'date'}]},
   {id:'L2O',  name:'L2-O 组织地图',  layer:'事实层', c:'c2', x:284, y:270,
    desc:'十问 + 人物表六栏。谁在哪、谁能决定什么；猜的标 [待确认] 并写「我从什么推的」。一月一核。',
@@ -1538,14 +1652,19 @@ const MODULES = [
    fields:[{k:'situation',l:'情境'},{k:'hypothesis',l:'假设'},{k:'acceptance',l:'验收标准'},{k:'action',l:'动作'},
            {k:'fact',l:'结果·事实'},{k:'interpret',l:'结果·解释'},{k:'delta',l:'差额'},{k:'fix',l:'修正指到哪一格'}]},
   {id:'L3B',  name:'L3-b 世界判断',  layer:'判断层', c:'c3', x:284, y:620,
-   desc:'一句押注，到期结算一次。三样齐才入库：到期日、那个数在哪、具名反方。',
-   fields:[{k:'claim',l:'一句押注',t:'textarea'},{k:'due',l:'到期日',t:'date'},{k:'metric',l:'那个数在哪'},{k:'opponent',l:'具名反方'},{k:'verdict',l:'结算',ph:'未结算 / 成立 / 不成立 / 作废'}]},
+   desc:'一句押注，到期结算一次。三样齐才入库：到期日、那个数在哪、具名反方。可选填「我有多确定」，到期后能看出你准不准。',
+   fields:[{k:'claim',l:'一句押注',t:'textarea'},{k:'due',l:'到期日',t:'date'},{k:'metric',l:'那个数在哪'},{k:'opponent',l:'具名反方'},
+           {k:'prob',l:'我有多确定(%)',ph:'55 / 70 / 85 / 95，可选'},{k:'verdict',l:'结算',ph:'未结算 / 成立 / 不成立 / 作废'}]},
   {id:'L4A',  name:'L4-a 行动算法',  layer:'算法层', c:'c4', x:564, y:510, gap:true,
-   desc:'触发条件 / 默认动作 / 检查清单 / 退出条件 / 使用记录。连续 2 次不灵作废。同类 L3-a ≥3 条才可提炼。',
-   fields:[{k:'trigger',l:'触发条件'},{k:'action',l:'默认动作'},{k:'checklist',l:'检查清单'},{k:'exit',l:'退出条件'},{k:'from',l:'来自哪几条判例'}]},
+   desc:'触发条件 / 默认动作 / 检查清单 / 退出条件 / 来自哪几条判例。退出条件由你写明，何时作废由你裁决。同类 L3-a ≥3 条才可提炼。',
+   fields:[{k:'trigger',l:'触发条件'},{k:'action',l:'默认动作'},{k:'checklist',l:'检查清单'},{k:'exit',l:'退出条件'},
+           {k:'worksWhen',l:'什么时候管用',ph:'适用条件'},{k:'failsWhen',l:'什么时候不灵（反例）',ph:'例外场景'},
+           {k:'from',l:'来自哪几条判例'}]},
   {id:'L4B',  name:'L4-b 判断算法',  layer:'算法层', c:'c4', x:564, y:620, gap:true,
    desc:'场合 / 顺序 / 换看法 / 断点（什么时候不该自己判）/ 使用记录。同类 L3-b ≥3 条（暂定）。',
-   fields:[{k:'occasion',l:'场合'},{k:'order',l:'顺序'},{k:'reframe',l:'换看法'},{k:'breakpoint',l:'断点'},{k:'from',l:'来自哪几条判断'}]},
+   fields:[{k:'occasion',l:'场合'},{k:'order',l:'顺序'},{k:'reframe',l:'换看法'},{k:'breakpoint',l:'断点'},
+           {k:'worksWhen',l:'什么时候管用'},{k:'failsWhen',l:'什么时候不灵（反例）'},
+           {k:'from',l:'来自哪几条判断'}]},
   {id:'C',    name:'C 共识',         layer:'旁挂',   c:'cm', x:844, y:40,
    desc:'两个人聊出的解释，不是事实。残片：只记日期/提出者/场合，不许当依据。结论：2 个 L 区出处 + 冷却 7 天 + 你点头 + 复核日，才可引用。L→C 单向。',
    fields:[{k:'tier',l:'档位',ph:'残片 / 结论'},{k:'text',l:'那句解释',t:'textarea'},
@@ -1565,14 +1684,14 @@ const M = Object.fromEntries(MODULES.map(m=>[m.id,m]));
 const PLAIN={
   L0:'每天给自己拍一张快照：睡了几小时、脑子清不清醒、心情咋样、焦不焦虑。原因一句话带过。',
   L1:'写清楚「我这个人是怎么回事」——我看重啥、怎么恢复精力、我的底线在哪。一个季度改一句就够。',
-  VERIFY:'找一个敢当面说你「这句是美化」的真人。不能是你自己，也不能是 AI。每季度问他一次。',
+  VERIFY:'找一个敢当面说你「这句是美化」的真人。不能是你自己，也不能是 AI。多久问一次由你定，问过记下来。',
   L2O:'画一张「谁是谁」的地图：谁在哪、谁能拍板、我凭什么这么判断。猜的标出来，别当事实。',
   L2W:'记外部的硬规矩和公开事实：谁定的、原文咋说、啥时候有效。传闻不收，用时才查。',
   D:'纯粹的草稿本。想法、情绪、牢骚随便倒，不打分、不评判，只管先接住。',
   POOL:'待办的前哨。一件事一行，说清「怎样才算做完」。做到了、值得复盘，才升级成判例。',
   L3A:'把一件做成或搞砸的事拆成七格复盘：当时怎么想、做了啥、结果如何、差在哪、下次改啥。',
   L3B:'对一个还没发生的事下判断、押个注。写清啥时候见分晓、看哪个数、谁来唱反调。到期结算。',
-  L4A:'同类判例攒够 3 条，提炼成你自己的「行动套路」：遇到什么情况、默认怎么做。不灵两次就作废。',
+  L4A:'同类判例攒够 3 条，提炼成你自己的「行动套路」：遇到什么情况、默认怎么做。退出条件由你写明，何时作废由你裁决。',
   L4B:'同类判断攒够 3 条，提炼成你的「思考套路」：什么场合、按什么顺序想、什么时候别自己拍板。',
   C:'你和别人聊出来的共识，不是事实。要满足两个出处、冷却七天、你点头，才记进来。',
   L5:'系统的体检台：到期没做的事、证据断的链、该体检的规矩，都在这儿冒出来提醒你。'
@@ -1627,6 +1746,10 @@ function normalizeDB(){
   if(!Array.isArray(DB.chat)) DB.chat=[];          // 对话持久化：刷新后可恢复（当前会话镜像）
   if(!DB.settings.quotaUsed) DB.settings.quotaUsed=0; // 真实提问额度：本周已用
   if(!DB.settings.quotaWeek) DB.settings.quotaWeek=weekKey();
+  // P1-6 记忆健康度：只观测、不考核。记录草稿/落盘/召回/修改，用来判断系统是否真的有用
+  if(!DB.health || typeof DB.health!=='object') DB.health={};
+  const H={drafts:0,commits:0,abandoned:0,recallHits:0,commitMs:0,commitN:0,lastOpen:Date.now(),installed:Date.now()};
+  Object.keys(H).forEach(k=>{ if(typeof DB.health[k]!=='number') DB.health[k]=H[k]; });
   normalizeAgentMemory();                          // Personal Agent：会话 / 记忆 / 摘要结构
 }
 /* ---------- Personal Agent 数据层：会话 + 工作记忆 ----------
@@ -1757,8 +1880,35 @@ function restoreBackup(key){
     return true;
   }catch(e){ return false; }
 }
+let _quotaWarnedAt=0;                       // 容量告警节流，避免每次保存都弹
+function isQuotaError(e){
+  return e && (e.name==='QuotaExceededError' || e.name==='NS_ERROR_DOM_QUOTA_REACHED' ||
+    e.code===22 || e.code===1014);
+}
+function warnStorageFull(){
+  const now=Date.now();
+  if(now-_quotaWarnedAt<60000) return;      // 1 分钟内只提醒一次
+  _quotaWarnedAt=now;
+  toast('本机存储已满，新内容没存进去——请立刻导出 JSON 备份', '导出备份', ()=>exportJSON());
+}
 function save(){
-  try{ DB.meta.updated=new Date().toISOString(); localStorage.setItem(KEY,JSON.stringify(DB)); }catch(e){}
+  if(DB.meta) DB.meta.updated=new Date().toISOString();   // 沙箱/旧数据可能无 meta
+  try{
+    const payload=JSON.stringify(DB);
+    localStorage.setItem(KEY,payload);
+    // 超过约 4MB（浏览器常见 5MB 上限的 80%）主动提醒，不等到写爆
+    if(payload.length>4.0e6 && Date.now()-_quotaWarnedAt>300000){
+      _quotaWarnedAt=Date.now();
+      toast('本机数据接近浏览器上限，建议导出 JSON 备份', '导出备份', ()=>exportJSON());
+    }
+  }catch(e){
+    if(isQuotaError(e)) warnStorageFull();
+    // 其余异常（如隐私模式禁用存储）也别静默：只在服务端模式外提示一次
+    else if(STORE.mode!=='server' && Date.now()-_quotaWarnedAt>120000){
+      _quotaWarnedAt=Date.now();
+      toast('本机存储不可用，当前改动可能无法保存', '导出备份', ()=>exportJSON());
+    }
+  }
   STORE.schedulePush(); // 服务端异步落卷（防抖）
 }
 const count = id => DB[id].length;
@@ -1808,7 +1958,7 @@ const RULES_TEXT =
 `硬拦（不合规不给写入）
   · L0 原因格 > 12 字 → 拒绝；出现「然后 / 后来 / 接着」→ 拒绝并提示归 D 区
   · L2-W 外部事实必须带来源（"你问我才查"的那格不许空）
-  · L1 每季只改一句：一句自我说明，不许整体重写
+  · L1 一次只改一句：一句自我说明，不许整体重写（改不改、何时改由你定）
   · L3-b 三样不齐（到期日 / 那个数在哪 / 具名反方）→ 不入库
   · L4-a / L4-b：同类判例 < 3 条 → 不允许提炼
   · C 共识：残片只要日期/提出者/场合但不能当依据；结论需 ≥2 出处 + 冷却 7 天 + 确认日
@@ -1839,7 +1989,7 @@ function validate(id,rec){
     // 一句 = 一个句末标点；顿号/分号并列多个维度 = 整体重写，退回只改一句
     const stops=(t.match(/[。！？.!?]/g)||[]).length;
     const joins=(t.match(/[；;]/g)||[]).length;
-    if(stops>1||joins>0||t.length>120) errors.push('L1 每季只改一句：这是一句自我说明，不是整体重写（多句/分号并列请拆成一条一条）');
+    if(stops>1||joins>0||t.length>120) errors.push('L1 一次只改一句：这是一句自我说明，不是整体重写（多句/分号并列请拆成一条一条）');
   }
   if(id==='INBOX'){
     if(!(rec.from||'').trim()) errors.push('收件箱缺「来自谁」');
@@ -1888,6 +2038,40 @@ function dueList(){
   return out.sort((a,b)=>a.d.localeCompare(b.d));
 }
 function daysLate(d){ return Math.floor((Date.now()-new Date(d).getTime())/864e5); }
+/* P1-3 预测校准：Brier Score（二元）+ 分桶命中率。纯计算、只读，可单测。
+   prob 存 0-100 的整数；outcome：成立=1，不成立=0，作废/未结算不计。 */
+function brierStats(rows){
+  const rs=Array.isArray(rows)?rows:((DB&&DB.L3B)||[]);
+  const done=rs.filter(r=>{
+    const p=Number(r.prob), v=(r.verdict||'').trim();
+    return isFinite(p)&&p>=0&&p<=100&&(v==='成立'||v==='不成立');
+  }).map(r=>({p:Number(r.prob)/100,o:(r.verdict==='成立')?1:0}));
+  if(!done.length) return {n:0,score:null,buckets:[]};
+  const score=done.reduce((s,x)=>s+Math.pow(x.p-x.o,2),0)/done.length; // 越小越准，0.25=瞎猜
+  const defs=[[0.5,'50%'],[0.6,'60%'],[0.7,'70%'],[0.8,'80%'],[0.9,'90%'],[0.95,'95%']];
+  const buckets=defs.map(([lo,label])=>{
+    const hi=lo+0.1, hit=done.filter(x=>x.p>=lo-1e-9&&x.p<hi);
+    return {label,n:hit.length,rate:hit.length? hit.reduce((s,x)=>s+x.o,0)/hit.length : null};
+  }).filter(b=>b.n>0);
+  return {n:done.length,score,buckets};
+}
+/* P1-6 记忆健康度：从埋点算观测指标。只读、不考核、可单测。 */
+function healthStats(h){
+  const H=h||((typeof DB!=='undefined'&&DB.health)||{});
+  const drafts=Number(H.drafts)||0, commits=Number(H.commits)||0, abandoned=Number(H.abandoned)||0;
+  const recallHits=Number(H.recallHits)||0, ms=Number(H.commitMs)||0, cn=Number(H.commitN)||0;
+  // 证据完整率：需要证据的结论层记录里，带 ev 的比例
+  const evMods=['L3A','L3B','L4A','L4B','C'];
+  let need=0,got=0;
+  if(typeof DB!=='undefined') evMods.forEach(m=>{ (DB[m]||[]).forEach(r=>{ need++; if(r.ev&&r.ev.length) got++; }); });
+  return {
+    drafts,commits,abandoned,recallHits,
+    editRate: drafts? Math.round(commits/drafts*100) : null,     // 起草→实写比例，低=老改草稿
+    avgSec: cn? (ms/cn/1000) : null,                              // 平均落盘耗时
+    evidenceRate: need? Math.round(got/need*100) : null,
+    days: H.installed? Math.max(1,Math.floor((Date.now()-Number(H.installed))/864e5)) : null
+  };
+}
 
 /* ---------- 4. AI 总控层（唯一可替换处） ---------- */
 /* 界面只认 {ops,notes,note}。换模型 = 换 AIClient.parse，其余一行不用改。 */
@@ -1910,8 +2094,10 @@ function buildPrompt(){
     '你是「万界系统」的录入助手。把用户的一句话解析成录入草稿，只输出一个 JSON 对象，不要解释文字。',
     '输出格式：{"ops":[{"m":"模块ID","rec":{"字段名":"值"}}],"notes":["提示"],"note":"一句话说明"}',
     '今天是 '+today+'。日期一律 YYYY-MM-DD；用户没说的字段留空字符串，绝不替他编造；一句话可能要写进多个模块（ops 可多条）。',
-    '硬规则（违反会被网页拦下，可在 notes 提醒）：L0 原因 ≤12 字且不含「然后/后来/接着」；L3-b 必须齐 到期日/那个数在哪/具名反方；L4-a、L4-b 需同类判例 ≥3 条；C 共识分两档：残片 tier=残片 只需 at/proposer/occasion（不能被引用为依据）；结论 tier=结论 需 ≥2 出处 + 冷却 7 天 + 确认日 + 复核日；L2-W 外部事实必须带 source 来源；L1 每季只改一句（text 只写一句，不要整体重写）；L3-a 必须有假设+验收标准才落判例（有预判才落）；D 日记默认标 cand=待定（候选是/否）。',
+    '硬规则（违反会被网页拦下，可在 notes 提醒）：L0 原因 ≤12 字且不含「然后/后来/接着」；L3-b 必须齐 到期日/那个数在哪/具名反方；L4-a、L4-b 需同类判例 ≥3 条；C 共识分两档：残片 tier=残片 只需 at/proposer/occasion（不能被引用为依据）；结论 tier=结论 需 ≥2 出处 + 冷却 7 天 + 确认日 + 复核日；L2-W 外部事实必须带 source 来源；L1 一次只改一句（text 只写一句，不要整体重写）；L3-a 必须有假设+验收标准才落判例（有预判才落）；D 日记默认标 cand=待定（候选是/否）。',
     '证据链：写 L3/L4/C 这类结论时，若它依据某条已存在的记录，可在 rec 里加 ev 数组，如 "ev":[{"m":"L0","k":"2026-11-13"}]，k 是那条记录的主键（日期/标题/情境等原文）。没有依据就别编，留空即可，网页会提醒「没有证据链」。',
+    '版本与冲突：写一条新判断去修正旧判断时，可在 rec 里加 "supersedes":[{"m":"L3B","k":"旧判断的原文"}] 表示取代了谁（旧记录不删）；与某条记录矛盾时加 "conflictsWith":[{"m":"模块","k":"原文"}]。k 必须是已存在记录的主键，否则会被忽略。',
+    '领域标签（可选）：可在 rec 里加 "domain":["工作"] 之类，最多 2 个，用来按工作/家庭/健康等横向切片复盘，不改变模块归属。用户没提就别加。',
     '模块与字段（m 用前面的 ID）：',
     ...MODULES.map(m=>'· '+m.id+' '+m.name+'：'+m.fields.map(f=>f.k+'('+f.l+')').join('、'))
   ].join('\n');
@@ -1945,6 +2131,24 @@ function normalizeDraft(r,src){
         .filter(e=>{ if(e.m!=='C') return true; const r=(DB.C||[])[findRecord('C',e.k)]; return !(r&&String(r.tier||'结论').trim()==='残片'); })
         .slice(0,12).map(e=>({m:e.m,k:String(e.k).slice(0,120)}));
       if(valid.length) rec.ev=valid;
+    }
+    // P1-5 版本与冲突元数据：只接纳指向真实记录的引用，杜绝编造
+    const rawRef=(k)=> (o.rec&&o.rec[k])||o[k];
+    ['supersedes','conflictsWith'].forEach(k=>{
+      const raw=rawRef(k);
+      if(Array.isArray(raw)){
+        const valid=raw.filter(e=>e&&M[e.m]&&typeof e.k==='string'&&findRecord(e.m,e.k)>=0)
+          .slice(0,8).map(e=>({m:e.m,k:String(e.k).slice(0,120)}));
+        if(valid.length) rec[k]=valid;
+      }
+    });
+    // P2-1 领域软标签：可选 1-2 个，跨工作/家庭/健康横向切片，不动 13 格本体
+    const rawDom=(o.rec&&o.rec.domain)||o.domain;
+    if(Array.isArray(rawDom)){
+      const doms=[...new Set(rawDom.map(x=>String(x).trim()).filter(Boolean))].slice(0,2).map(x=>x.slice(0,24));
+      if(doms.length) rec.domain=doms;
+    }else if(rawDom!=null&&String(rawDom).trim()){
+      rec.domain=[String(rawDom).trim().slice(0,24)];
     }
     return {m:o.m,rec:rec};
   });
@@ -2006,11 +2210,108 @@ function memoryBlockText(){
   const m=DB.memory||{};
   return MEM_BLOCKS.filter(k=>(m[k]||'').trim()).map(k=>'['+MEM_LABEL[k]+'] '+m[k].trim()).join('\n') || '（工作记忆目前为空，随着对话慢慢积累）';
 }
-/* 组装上下文：稳定系统提示 + 工作记忆 + 滚动摘要 + 最近 N 轮 + 图谱检索注入 */
+/* 历史档案召回（只读）：从当前这句话提关键词，在 13 模块里找相关旧记录。
+   只返回精简候选片段，供 Agent 对话时"想起来"；绝不写任何库。
+   放前端是因为数据就在前端（localStorage），服务端工具循环里没有记录正文。 */
+function archiveRecall(text, limit){
+  const cap=Math.max(1,Math.min(Number(limit)||6,12));
+  const raw=String(text||'').toLowerCase()
+    .split(/[\s，。！？、；：,!?;:（）()【】\[\]《》""'']+/).filter(Boolean);
+  // 中文连续文本按相邻二字（bigram）切，零依赖、无需词典；英文数字保留整词
+  const kws=[];
+  raw.forEach(w=>{
+    if(/[\u4e00-\u9fa5]/.test(w)&&w.length>1){
+      for(let i=0;i<w.length-1;i++) kws.push(w.slice(i,i+2));
+    }else if(w.length>=2) kws.push(w);
+  });
+  const keys=[...new Set(kws)].slice(0,12); // 去重 + 限量，防噪音与算力
+  if(!keys.length) return [];
+  const out=[];
+  MODULES.forEach(m=>{
+    (DB[m.id]||[]).forEach((r,idx)=>{
+      const fields=(m.fields||[]).map(f=>String(r[f.k]==null?'':r[f.k]));
+      const all=fields.join(' ').toLowerCase();
+      const hit=keys.filter(k=>all.indexOf(k)>=0);
+      if(!hit.length) return;
+      const hitField=fields.find(v=>keys.some(k=>v.toLowerCase().indexOf(k)>=0))||'';
+      out.push({m:m.id,mname:m.name,idx,score:hit.length,snippet:hitField.slice(0,160)});
+    });
+  });
+  out.sort((a,b)=>b.score-a.score);
+  const picked=out.slice(0,cap);
+  if(picked.length && typeof bumpHealth==='function') bumpHealth('recallHits',picked.length); // P1-6 只观测
+  return picked;
+}
+/* ===== P2-4 可选本地 Embedding 混合检索（默认关闭）=====
+   服务端 WANJIE_EMBED=1 才可用；离线/未配置时静默回退到 archiveRecall 关键词结果。
+   纯只读：只调 /embed 拿向量，不写任何库。云端 embedding 会在前端给显眼提示。 */
+let EMBED_STATUS=null;   // {enabled,cloud,model} 缓存；null=还没探测
+async function detectEmbed(){
+  if(EMBED_STATUS!==null) return EMBED_STATUS;
+  try{
+    const r=await fetch('/health',{signal:AbortSignal.timeout?AbortSignal.timeout(1500):undefined});
+    const j=await r.json(); EMBED_STATUS=j.embed||{enabled:false};
+  }catch(e){ EMBED_STATUS={enabled:false}; }
+  return EMBED_STATUS;
+}
+let SEM_CACHE=[];        // 本轮语义召回候选，buildContext 读取并与关键词 RRF 融合
+async function semanticRecall(text, limit){
+  SEM_CACHE=[];
+  const cap=Math.max(1,Math.min(Number(limit)||6,12));
+  const st=await detectEmbed();
+  if(!st.enabled){ return []; }
+  const q=String(text||'').trim();
+  if(!q) return [];
+  try{
+    // 收集所有记录文本作为候选（与 archiveRecall 同样的模块遍历，只读）
+    const docs=[];
+    MODULES.forEach(m=>(DB[m.id]||[]).forEach((r,idx)=>{
+      const txt=(m.fields||[]).map(f=>String(r[f.k]==null?'':r[f.k])).filter(Boolean).join(' ');
+      if(txt.trim()) docs.push({m:m.id,idx,key:recKey(m.id,r),text:txt.slice(0,1600)});
+    }));
+    if(!docs.length) return [];
+    const r=await fetch('/embed',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({texts:[q].concat(docs.map(d=>d.text))})});
+    const j=await r.json();
+    if(!j.ok||!Array.isArray(j.vectors)||!j.vectors[0]) return [];
+    if(j.cloud && !window.__embedCloudWarned){
+      window.__embedCloudWarned=true;
+      toast('注意：语义检索把档案文本发到了云端 Embedding 服务');
+    }
+    const qv=j.vectors[0];
+    const scored=docs.map((d,i)=>({m:d.m,mname:M[d.m].name,idx:d.idx,key:d.key,
+      sim:(j.vectors[i+1]?cosineLocal(qv,j.vectors[i+1]):0)}))
+      .filter(x=>x.sim>0.25).sort((a,b)=>b.sim-a.sim).slice(0,cap)
+      .map(x=>({m:x.m,mname:x.mname,idx:x.idx,score:x.sim,snippet:'语义相近',sem:true}));
+    SEM_CACHE=scored;
+    return scored;
+  }catch(e){ return []; } // 任何失败都静默回退关键词检索
+}
+function cosineLocal(a,b){
+  if(!Array.isArray(a)||!Array.isArray(b)||a.length!==b.length) return 0;
+  let dot=0,na=0,nb=0;
+  for(let i=0;i<a.length;i++){ dot+=a[i]*b[i]; na+=a[i]*a[i]; nb+=b[i]*b[i]; }
+  return (na&&nb)?dot/(Math.sqrt(na)*Math.sqrt(nb)):0;
+}
+/* RRF 融合关键词 + 语义两路候选（k=60 标准参数） */
+function fuseRecall(kw,sem){
+  if(!sem||!sem.length) return kw;
+  const score={}, items={};
+  const add=(list,weight)=>list.forEach((x,i)=>{
+    const id=x.m+'|'+x.idx; score[id]=(score[id]||0)+weight/(60+i+1); items[id]=x;
+  });
+  add(kw,1); add(sem,1);
+  return Object.keys(score).sort((a,b)=>score[b]-score[a]).slice(0,8).map(id=>items[id]);
+}
+/* 组装上下文：稳定系统提示 + 工作记忆 + 滚动摘要 + 最近 N 轮 + 档案召回 */
 function buildContext(){
   const s=currentSession()||{summary:'',messages:[]};
   const recent=(CHAT||[]).filter(m=>m.role!=='sys').slice(-CTX_RECENT)
     .map(m=>({role:m.role==='user'?'user':'assistant',content:String(m.content||'').slice(0,4000)}));
+  const lastUser=[...recent].reverse().find(m=>m.role==='user');
+  const kwArchive=archiveRecall(lastUser?lastUser.content:'', 6);
+  const archive=(typeof fuseRecall==='function'&&SEM_CACHE&&SEM_CACHE.length)
+    ? fuseRecall(kwArchive,SEM_CACHE) : kwArchive;
   return {
     system:'你是「万界」——一个帮用户把想法沉淀成认知系统的 Personal Agent。\n'+
       '你记得关于用户的事，会用这些了解让回答更贴他。聊天就好好聊，别每句都往记录上引。\n'+
@@ -2021,6 +2322,7 @@ function buildContext(){
     memory:JSON.parse(JSON.stringify(DB.memory||{})),
     summary:s.summary||'',
     counts:Object.fromEntries(MODULES.map(m=>[m.id,count(m.id)])),
+    archive:archive,
     today:new Date().toISOString().slice(0,10)
   };
 }
@@ -2068,16 +2370,23 @@ function extractMemoryWrite(text){
   return value? {block:block,value:String(value).slice(0,300)} : null;
 }
 /* 本地对话引擎（无模型也可跑）：基于工作记忆与图谱现状给个性化回应，不写库 */
-function localChat(text,ctx){
+function localChat(text,archive){
   const m=DB.memory||{}, t=String(text||'').trim();
   const user=(m.user||'').trim(), loops=(m.openLoops||'').trim();
   const total=MODULES.reduce((s,x)=>s+count(x.id),0);
+  const hits=Array.isArray(archive)?archive:[];
   if(/你(还)?记得|你知道我|我是谁|你了解我|关于我/.test(t)){
     if(user) return {reply:'我记得你告诉过我：'+user+(loops?'\n还有：'+loops:''),ops:[],tools:['记忆 · 读取']};
     return {reply:'我们才刚开始，你还没让我记住什么。说一句「记住：我习惯早上写作」，我就长期记着。',ops:[],tools:['记忆 · 读取']};
   }
   if(/^(你好|嗨|hi|hello|在吗|早上好|晚上好)/i.test(t)){
     return {reply:(user?'在。我记得你说过：'+user.split(/[，。；\n]/)[0]+'。\n\n':'在。')+'想跟我聊点什么，还是让我记点什么？',ops:[],tools:[]};
+  }
+  // 档案召回：本地演示模式也能"想起"历史里相关的事（只读引用，不写库）
+  if(hits.length){
+    const lines=hits.slice(0,3).map(h=>'· '+h.mname+'：'+String(h.snippet||'').slice(0,90));
+    return {reply:'翻了下你的档案，这几件旧事可能跟这句有关：\n'+lines.join('\n')+
+      '\n\n（本地演示只是按字面匹配找的；接上模型后会按意思找得更准。）',ops:[],tools:['档案 · 召回']};
   }
   const who=user? '\n（我记得：'+user.split(/[，。；\n]/)[0]+'）':'';
   return {reply:'我听着。'+who+'\n\n本地演示模式下我能陪你聊、记住你说的话（说「记住：…」就行），也能把值得沉淀的事起草成记录。'+
@@ -2217,11 +2526,11 @@ function missingFor(m,rec){
   return ask.filter(x=>!(rec[x.k]||'').trim());
 }
 /* 本地 Agent：三意图分流（chat 对话 / memory 写记忆 / record 写记录）。无密钥时的完整骨架演示 */
-function localAgent(text){
+function localAgent(text,archive){
   const today=new Date().toISOString().slice(0,10);
   const intent=classifyIntent(text);
-  // ① 纯对话：基于工作记忆个性化回应，不写任何库、不追问字段
-  if(intent==='chat' && !FILLING) return localChat(text);
+  // ① 纯对话：基于工作记忆 + 档案召回个性化回应，不写任何库、不追问字段
+  if(intent==='chat' && !FILLING) return localChat(text,archive);
   // ② 写工作记忆：起草一条 memory 写入，用户点头才落盘
   if(intent==='memory'){
     const w=extractMemoryWrite(text);
@@ -2267,7 +2576,8 @@ const AIClient = {
     if(ep && ep.charAt(0)==='/' && location.protocol==='file:') ep='http://localhost:8787'+ep;
     if(mode==='local'||!ep){
       const last=[...messages].reverse().find(m=>m.role==='user');
-      const out=localAgent(String(last?last.content:''));
+      const txt=String(last?last.content:'');
+      const out=localAgent(txt, archiveRecall(txt,6));
       return Object.assign(out,{note:mode!=='local'&&!ep?'没填接口地址 → 已退回本地 Agent':''});
     }
     const ctrl=(typeof AbortController==='function')?new AbortController():null;
@@ -2281,7 +2591,7 @@ const AIClient = {
           system:ctx.system, tools:TOOL_SPEC,
           modelId:(DB.settings.ai.modelId||''),
           intent:classifyIntent(String((messages[messages.length-1]||{}).content||'')),
-          context:{today:ctx.today,counts:ctx.counts,memory:ctx.memory,
+          context:{today:ctx.today,counts:ctx.counts,memory:ctx.memory,archive:ctx.archive,
             files:(ATTACHMENTS||[]).map(f=>({name:f.name,text:String(f.text||'').slice(0,12000)}))}
         }),signal:ctrl?ctrl.signal:undefined});
     }catch(err){
@@ -2548,6 +2858,80 @@ function dendrites(id){
   return out;
 }
 
+/* ===== P2-2 只读辅助视图：证据链聚焦子图 + 层级×时间矩阵 ===== */
+const MAP_MODE='neuro'; // 'neuro' | 'evidence' | 'matrix'
+let EV_FOCUS=null; // {m,key}
+function setMapMode(mode){
+  const neuro=$('#mapCanvas'), ev=$('#evSubgraph'), mx=$('#timeMatrix');
+  if(neuro) neuro.hidden=mode!=='neuro';
+  if(ev) ev.hidden=mode!=='evidence';
+  if(mx) mx.hidden=mode!=='matrix';
+  $$('.map-mode-btn').forEach(b=>b.classList.toggle('on',
+    (b.id==='viewEvidence'&&mode==='evidence')||(b.id==='viewMatrix'&&mode==='matrix')));
+  // 辅助视图下隐藏 neurons（它们在 mapCanvas 里，已随 hidden 隐藏）
+  if(mode==='evidence') renderEvidenceView();
+  if(mode==='matrix') renderMatrixView();
+  haptic(8);
+}
+function renderEvidenceView(){
+  const pick=$('#evPicker'), cv=$('#evCanvas'); if(!pick||!cv) return;
+  // 收集所有带证据链的记录作为可选焦点
+  const all=[];
+  MODULES.forEach(m=>(DB[m.id]||[]).forEach((r,idx)=>{
+    if(['L3A','L3B','L4A','L4B','C'].indexOf(m.id)<0) return;
+    if(r.ev&&r.ev.length) all.push({m:m.id,idx,key:recKey(m.id,r)||('#'+(idx+1))});
+  }));
+  if(!all.length){
+    pick.innerHTML='<span class="mav-none">还没有带证据链的判断。先记几条 L3/L4，这里就能理清它们的关系。</span>';
+    cv.innerHTML=''; return;
+  }
+  if(!EV_FOCUS||!all.some(x=>x.m===EV_FOCUS.m&&x.key===EV_FOCUS.key)) EV_FOCUS=all[all.length-1];
+  pick.innerHTML='<span class="mav-pick-lb">焦点记录：</span>'+all.map(x=>
+    '<button class="mav-pick'+(EV_FOCUS.m===x.m&&EV_FOCUS.key===x.key?' on':'')+'" data-evfocus="'+x.m+'|'+esc(x.key)+'">'+esc(M[x.m].name.split(' ')[0])+' · '+esc(x.key)+'</button>').join('');
+  const focus=(DB[EV_FOCUS.m]||[])[EV_FOCUS.idx];
+  if(!focus||!focus.ev){ cv.innerHTML=''; return; }
+  // 1 跳上下游：焦点 → 它的证据；以及谁引用了焦点
+  const ups=focus.ev.filter(e=>M[e.m]&&findRecord(e.m,e.k)>=0);
+  const downs=[];
+  MODULES.forEach(m=>(DB[m.id]||[]).forEach(r=>{
+    if(r.ev&&r.ev.some(e=>e.m===EV_FOCUS.m&&e.k===EV_FOCUS.key))
+      downs.push({m:m.id,key:recKey(m.id,r)||'',label:String(r.claim||r.trigger||r.text||r.situation||'').slice(0,22)});
+  }));
+  const node=(m,key,cls)=>'<div class="mav-node '+cls+'" data-ev="'+esc(m)+'|'+esc(key)+'"><b>'+esc(M[m]?M[m].name.split(' ')[0]:m)+'</b><span>'+esc(key)+'</span></div>';
+  cv.innerHTML='<div class="mav-flow">'+
+    '<div class="mav-col"><div class="mav-col-h">依据（它凭什么）</div>'+
+      (ups.length?ups.map(e=>node(e.m,e.k,'up')).join(''):'<span class="mav-none">没有上游证据</span>')+'</div>'+
+    '<div class="mav-arrows">→ &nbsp; →</div>'+
+    '<div class="mav-col"><div class="mav-col-h">焦点判断</div>'+node(EV_FOCUS.m,EV_FOCUS.key,'focus')+'</div>'+
+    '<div class="mav-arrows">→ &nbsp; →</div>'+
+    '<div class="mav-col"><div class="mav-col-h">谁引用了它</div>'+
+      (downs.length?downs.map(d=>node(d.m,d.key,'down')).join(''):'<span class="mav-none">还没有下游</span>')+'</div>'+
+    '</div><p class="mav-note">只画证据关系（实线），不画视觉装饰连线。点任意节点跳过去看原文。</p>';
+}
+function renderMatrixView(){
+  const cv=$('#matrixCanvas'); if(!cv) return;
+  // 按月聚合：行=13 模块，列=有记录的月份
+  const months=new Set();
+  const cells={};
+  MODULES.forEach(m=>(DB[m.id]||[]).forEach(r=>{
+    const d=r.createdAt||r.date||r.at||r.due||'';
+    const mo=String(d).slice(0,7);
+    if(/^\d{4}-\d{2}$/.test(mo)){ months.add(mo); cells[m.id]=cells[m.id]||{}; cells[m.id][mo]=(cells[m.id][mo]||0)+1; }
+  }));
+  const ms=[...months].sort();
+  if(!ms.length){ cv.innerHTML='<p class="mav-none">记录还没有日期。带日期的记录会按「模块 × 月份」铺成这张表。</p>'; return; }
+  const max=Math.max(1,...Object.values(cells).flatMap(o=>Object.values(o)));
+  const shade=n=>n? 'rgba(90,169,255,'+(0.12+0.7*n/max).toFixed(2)+')':'transparent';
+  let html='<table class="matrix-table"><thead><tr><th>模块</th>'+ms.map(m=>'<th>'+m.slice(2)+'</th>').join('')+'</tr></thead><tbody>';
+  MODULES.forEach(m=>{
+    html+='<tr><th>'+esc(m.name.split(' ')[0])+'</th>'+ms.map(mo=>{
+      const n=(cells[m.id]||{})[mo]||0;
+      return '<td style="background:'+shade(n)+'" title="'+esc(m.name)+' · '+mo+' · '+n+' 条">'+(n||'·')+'</td>';
+    }).join('')+'</tr>';
+  });
+  html+='</tbody></table><p class="mav-note">数字＝该模块该月新增条数；颜色越亮越多。没有日期的记录不计入。只读视图，不改任何数据。</p>';
+  cv.innerHTML=html;
+}
 function renderMap(){
   const cv=$('#mapCanvas'); if(!cv) return;
   $$('.neuron',cv).forEach(n=>n.remove());
@@ -2871,7 +3255,9 @@ function makeDistillDraft(dst){
     rec={trigger:'当反复遇到同类情境（'+sits.join(' / ')+'）',
          action:'默认：'+[acts[0],acts[1]].filter(Boolean).join('；'),
          checklist:'① 先核对是不是同类 ② 看假设与验收标准是否写全 ③ 事后事实/解释分栏记差额',
-         exit:'连续 2 次不灵即作废',
+         exit:'（写明什么情况下停用；失效由你复核裁决，不自动作废）',
+         worksWhen:'（什么条件下管用？例：目标明确、能独立执行）',
+         failsWhen:'（哪些场景不灵？填反例，别让一条规律覆盖所有情况）',
          from:'来自 L3-a 判例 '+rows.map((r,i)=>'#'+(i+1)+' '+(recKey(src,r)||'')).join('；'),
          ev:evs};
     note='从 '+rows.length+' 条 L3-a 判例归纳的草稿 · 请核对后点头，算法只能由你确认';
@@ -2882,6 +3268,8 @@ function makeDistillDraft(dst){
          order:'① 写清到期日 ② 定「那个数在哪」 ③ 找具名反方 ④ 到期才结算',
          reframe:'换一个具名反方的视角重看一遍',
          breakpoint:'三样（到期/数/反方）缺一样就不下判断',
+         worksWhen:'（什么场合这套顺序管用？）',
+         failsWhen:'（遇到什么情况不该用这条判断套路？）',
          from:'来自 L3-b 判断 '+rows.map((r,i)=>'#'+(i+1)+' '+(recKey(src,r)||'')).join('；'),
          ev:evs};
     note='从 '+rows.length+' 条 L3-b 判断归纳的草稿 · 请核对后点头';
@@ -2890,8 +3278,32 @@ function makeDistillDraft(dst){
   toast('已起草 '+M[dst].name+' · 点「确认写入」才落盘');
 }
 /* 主动提醒：把静态清单变成会自己冒出来的系统提示 */
+/* P1-2 宽恕式回归：断更≥7天或超期红标>5条时，把三处红标折叠成一条温和入口 */
+const GRACE={days:0,late:0,dismissed:false};
+function computeGrace(){
+  const h=DB.health||{}, last=Number(h.lastOpen)||Date.now();
+  GRACE.days=Math.max(0,Math.floor((Date.now()-last)/864e5));
+  GRACE.late=dueList().filter(x=>daysLate(x.d)>14).length;
+  try{ DB.health.lastOpen=Date.now(); save(); }catch(e){}
+}
+function graceForgiveMode(){ return !GRACE.dismissed && (GRACE.days>=7 || GRACE.late>5); }
+function graceDefer(){
+  backupCurrent('顺延前');
+  const shift=(m,k)=>{ (DB[m]||[]).forEach(r=>{ if(r[k]&&daysLate(r[k])>0){
+    const dt=new Date(r[k]); dt.setDate(dt.getDate()+7); r[k]=dt.toISOString().slice(0,10); } }); };
+  shift('L3B','due'); shift('POOL','due'); shift('C','reviewAt');
+  GRACE.dismissed=true; GRACE.late=0;
+  save(); renderAll();
+  toast('旧项已顺延 7 天 · 一条都没删','撤销',()=>{ if(confirm('撤销顺延？会回到刚才的备份。')){ restoreBackup('顺延前'); renderAll(); } });
+}
 function systemAlerts(){
   const out=[];
+  if(graceForgiveMode()){
+    const n=dueList().length+GRACE.late;
+    return [{level:'info',t:'休整归来 · '+(n||'几')+' 条旧项待整理',
+      d:'离开 '+(GRACE.days||'一段')+' 天，攒了些旧项。不用急着补齐——点开按自己的节奏整理，记录一条都没删。',
+      act:{type:'grace',label:'慢慢整理'}}];
+  }
   // 1. 提炼机会（唯一产生价值的地方）
   distillCandidates().forEach(c=>out.push({
     level:'ok', t:c.label+'提炼条件已到',
@@ -2956,6 +3368,21 @@ function evChainHTML(m,i,r){
   h+='</div>';
   return h;
 }
+/* P1-5 版本与冲突：显示这条记录的创建/更新时间、它取代了谁、与谁冲突。只读、可点跳转。 */
+function versionChainHTML(m,i,r){
+  const sup=r.supersedes||[], conf=r.conflictsWith||[];
+  const hasMeta=r.createdAt||r.updatedAt||sup.length||conf.length;
+  if(!hasMeta) return '';
+  const chip=arr=>arr.map(e=>'<span class="vc-chip" data-ev="'+esc(e.m)+'|'+esc(e.k)+'">'+
+    esc(M[e.m]?M[e.m].name.split(' ')[0]:e.m)+' · '+esc(e.k)+'</span>').join('')||'<span class="vc-none">无</span>';
+  let h='<div class="vc-chain"><div class="ev-h">版本与冲突 · 判断怎么变到现在</div>';
+  if(r.createdAt) h+='<div class="vc-date">记于 '+esc(String(r.createdAt).slice(0,10))+
+    (r.updatedAt&&String(r.updatedAt).slice(0,10)!==String(r.createdAt).slice(0,10)?' · 改于 '+esc(String(r.updatedAt).slice(0,10)):'')+'</div>';
+  if(sup.length) h+='<div class="vc-row"><span class="vc-lb">取代了（旧判断仍在，不删）</span>'+chip(sup)+'</div>';
+  if(conf.length) h+='<div class="vc-row"><span class="vc-lb">与它冲突</span>'+chip(conf)+'</div>';
+  h+='</div>';
+  return h;
+}
 /* 审计台专用：把「还有哪些项目要做」摊开成一张可点的清单 */
 function auditTodo(){
   const out=[], today=Date.now();
@@ -2988,9 +3415,49 @@ function auditTodo(){
     go:'VERIFY',state:qLeft>0?'剩 '+qLeft:'已用完',k:qLeft>0?'ok':''});
   return out;
 }
+/* ===== P2-3 认知体检简报：纯本地规则，只读诊断，不写任何库、不扣额度 =====
+   只发现「跨模块的隐性模式」，每条都标明线索与出处；绝不替用户下结论或自动写入。 */
+function cognitiveCheckup(){
+  const out=[];
+  // 1. 长期待确认却被反复引用的组织判断
+  const pending=(DB.L2O||[]).filter(r=>(r.status||'').indexOf('待确认')>=0);
+  if(pending.length>=2) out.push({level:'warn',t:'有 '+pending.length+' 条组织判断一直标着「待确认」',
+    d:'L2-O 里 '+pending.map(r=>r.who||'某人').slice(0,3).join('、')+' 还没核实。长期拿猜测当背景，判断会悄悄偏掉。',
+    go:'L2O'});
+  // 2. 反复出现的情绪词（最近 D 区）
+  const recentD=(DB.D||[]).slice(-12);
+  const emo={};
+  recentD.forEach(r=>{ const t=String(r.text||'');
+    ['怕','累','烦','不敢','拖','焦虑','委屈','愤怒'].forEach(w=>{ if(t.indexOf(w)>=0) emo[w]=(emo[w]||0)+1; });
+  });
+  const top=Object.entries(emo).sort((a,b)=>b[1]-a[1])[0];
+  if(top&&top[1]>=3) out.push({level:'info',t:'近期日记里「'+top[0]+'」出现了 '+top[1]+' 次',
+    d:'这是一个可以被观察的重复主题，不等于结论。要不要立一条 L3-a 去验证，由你决定——这里只提示，不写库。',
+    go:'D'});
+  // 3. 判断/算法一直没有结算或复核
+  const unsettled=(DB.L3B||[]).filter(r=>r.due&&r.verdict==='未结算').length;
+  if(unsettled>=2) out.push({level:'warn',t:'有 '+unsettled+' 条押注到期还没结算',
+    d:'到期不结算，预测校准就永远是空的。结算一次，Brier 看板才有意义。',go:'L3B'});
+  const st=brierStats(DB.L3B);
+  if(st.n>=3&&st.score>0.3) out.push({level:'info',t:'预测校准偏乐观（Brier '+st.score.toFixed(2)+'）',
+    d:'给自己的把握普遍偏高。下次写押注时，试试把「确定」往下调一档。只是提示，判断仍由你下。',go:'L3B'});
+  // 4. 证据缺口
+  const ie=evidenceIssues();
+  if(ie.length) out.push({level:'warn',t:ie.length+' 条结论没有证据链',
+    d:'没有证据的判断只是印象。补上来源，或明确标成「只是印象」，别让它冒充事实。',go:'L5'});
+  // 5. 算法建成后从没记过使用
+  const algos=(DB.L4A||[]).length+(DB.L4B||[]).length;
+  if(algos>0&&st.n===0&&count('L3A')+count('L3B')<5)
+    out.push({level:'info',t:'有 '+algos+' 条算法，但判例还很少',
+      d:'算法是提炼出来的规律，样本还薄时别当成铁律。多攒几条判例再回头校准它。',go:'L5'});
+  if(!out.length) out.push({level:'ok',t:'这次没发现明显的隐性模式',
+    d:'不是没问题，是现有记录里没读到强信号。继续正常记录，下次再看。',go:'L5'});
+  return out;
+}
 /* 抽屉渐进折叠：记住每个区展开哪些段、展开哪条记录 */
 const DRAWER_FOLDS={};        // {moduleId: {key:true}}
 const DRAWER_REC={};          // {moduleId: recordIndex} 当前展开的记录
+let CHECKUP_RESULT=null;      // P2-3 体检简报缓存（本次会话，不入库）
 function foldOn(mod,key){ return !!(DRAWER_FOLDS[mod]&&DRAWER_FOLDS[mod][key]); }
 function toggleFold(mod,key){ DRAWER_FOLDS[mod]=DRAWER_FOLDS[mod]||{}; DRAWER_FOLDS[mod][key]=!DRAWER_FOLDS[mod][key]; renderDrawer(); }
 function toggleRec(mod,i){ DRAWER_REC[mod]=(DRAWER_REC[mod]===i?null:i); renderDrawer(); }
@@ -3027,6 +3494,14 @@ function renderDrawer(){
       '<div class="tbody"><b>'+esc(x.t)+'</b><small>'+esc(x.d)+'</small></div>'+
       '<span class="tstate">'+esc(x.state)+'</span></div>').join('');
     h+=foldHTML(CUR,'todo','还要做的项目','未完成的待办，点一条直接跳过去',open+' 项',todoBody);
+    // P2-3 认知体检简报（只读，点按钮才生成）
+    const chk=CHECKUP_RESULT;
+    const chkBody='<button class="checkup-btn" id="genCheckup">✦ 生成这次的体检简报</button>'+
+      (chk? '<div class="checkup-report"><div class="checkup-time">生成于 '+esc(chk.at)+'</div>'+
+        chk.items.map(x=>'<div class="checkup-item '+esc(x.level)+'"><b>'+esc(x.t)+'</b><small>'+esc(x.d)+'</small></div>').join('')+
+        '<p class="mav-note">这只是读出来的线索，不是给你的结论。要据此改判断，仍要你自己起草、点头。</p></div>'
+       : '<p class="mav-tip">读一遍现有记录，找跨模块的重复模式和隐性矛盾。只读、不写库、不扣额度。</p>');
+    h+=foldHTML(CUR,'checkup','认知体检简报','跨模块看重复模式，只读不改数据',chk?chk.items.length+' 条':'点生成',chkBody);
   }
   // 闭环：可提炼
   const cand=distillCandidates().find(c=>c.src===CUR);
@@ -3047,6 +3522,9 @@ function renderDrawer(){
         else body+=recLine(f,r);
       });
       body+=evChainHTML(CUR,i,r);
+      body+=versionChainHTML(CUR,i,r);
+      if(r.domain&&r.domain.length) body+='<div class="domain-tags">'+
+        r.domain.map(d=>'<span class="domain-tag">◇ '+esc(d)+'</span>').join('')+'</div>';
       return '<div class="rec'+(expanded?' expanded':'')+'" data-rec="'+i+'">'+
         '<button class="rec-head" data-rec-open="'+i+'"><i class="rh-dot"></i>'+
         '<span class="rh-t">'+esc(recKey(CUR,r)||m.name+' #'+String(i+1).padStart(2,'0'))+'</span>'+
@@ -3077,11 +3555,73 @@ function renderBoard(){
     return '<div class="due-item"><span>'+esc(x.t)+'</span><span class="'+(late>14?'late':'')+'">'+esc(x.d)+(late>0?' · 超 '+late+' 天':'')+'</span></div>';
   }).join('') : '<div class="empty">到期队列为空</div>';
   $('#auditList').innerHTML=DB.L5.map(r=>'<div class="due-item" data-open="L5"><span>'+esc(r.title)+'</span><span>'+esc(r.kind)+' · '+esc(r.at)+'</span></div>').join('');
+  // P1-3 预测校准看板（原生 SVG，零依赖）
+  const cb=$('#calibBody'); if(cb){
+    const st=brierStats(DB.L3B);
+    if(!st.n){
+      cb.innerHTML='<p class="calib-empty">还没有结算过的押注。在 L3-b 写判断时填一下「我有多确定」，到期结算成「成立/不成立」，这里就能看出你说话准不准。</p>';
+    }else{
+      const pct=(st.score*100).toFixed(0);
+      const verdict=st.score<0.1?'很准':st.score<0.2?'挺准':st.score<0.25?'比瞎猜强':st.score<=0.3?'一般，还能练':'偏乐观，收着点';
+      const W=560,H=120,pad=26,bw=44;
+      const maxN=Math.max(1,...st.buckets.map(b=>b.n));
+      let bars='';
+      st.buckets.forEach((b,i)=>{
+        const x=pad+i*(bw+22), bh=(b.rate!=null?b.rate:0)*(H-2*pad);
+        const gh=H-2*pad;
+        bars+='<g><rect x="'+x+'" y="'+(H-pad-gh)+'" width="'+bw+'" height="'+gh+'" rx="3" fill="var(--accent)" opacity="'+(b.rate!=null?.75:.2)+'"/>'+
+          '<text x="'+(x+bw/2)+'" y="'+(H-8)+'" text-anchor="middle" class="calib-lb">'+b.label+'</text>'+
+          '<text x="'+(x+bw/2)+'" y="'+(H-pad-gh-5)+'" text-anchor="middle" class="calib-v">'+(b.rate!=null?Math.round(b.rate*100)+'%':'—')+'</text>'+
+          '<text x="'+(x+bw/2)+'" y="'+(H-16)+'" text-anchor="middle" class="calib-n">n='+b.n+'</text></g>';
+      });
+      cb.innerHTML='<p class="calib-sum">结算 '+st.n+' 条 · Brier <b>'+st.score.toFixed(3)+'</b>（0 最准，0.25 相当于瞎猜）· '+verdict+'</p>'+
+        '<svg class="calib-svg" viewBox="0 0 '+W+' '+H+'" width="100%" height="'+H+'" preserveAspectRatio="xMinYMid meet">'+bars+'</svg>'+
+        '<p class="calib-note">横轴＝当初说的把握（给 70% 的），柱子＝这些人里实际说对的比例。理想情况：说 70% 的那组，大约真有 70% 说对。</p>';
+    }
+  }
+  // P1-6 记忆健康度（只观测、不考核）
+  const hb=$('#healthBody'); if(hb){
+    const s=healthStats();
+    if(s.drafts===0 && s.recallHits===0){
+      hb.innerHTML='<p class="calib-empty">还没有可观测的数据。用一阵子后，这里会显示：起草多少、真正写入多少、花了多久、历史被想起几次——用来判断这套系统是在帮你，还是在给你添活。这些数字只给你看，不是任务。</p>';
+    }else{
+      const cell=(v,l,tip)=>'<div class="hc"><div class="hv">'+(v==null?'—':v)+'</div><div class="hl">'+l+'</div>'+(tip?'<div class="ht">'+tip+'</div>':'')+'</div>';
+      hb.innerHTML='<div class="hgrid">'+
+        cell(s.drafts,'次起草','AI 出的草稿数')+
+        cell(s.commits,'条写入','真正点头落盘的')+
+        cell(s.editRate==null?'—':s.editRate+'%','采纳率','写入÷起草，低说明草稿常被打回')+
+        cell(s.recallHits,'次想起','历史档案被召回参与对话')+
+        cell(s.avgSec==null?'—':s.avgSec.toFixed(1)+'s','平均落盘','从起草到点头')+
+        cell(s.evidenceRate==null?'—':s.evidenceRate+'%','证据完整','判断/算法里带证据链的比例')+
+        '</div><p class="calib-note">这些是观测项，不是要你完成的指标。采纳率低说明识别得不准，想起次数为 0 说明读路径还没用起来——都是改进线索，不是你的成绩单。</p>';
+    }
+  }
 }
 /* ========== 检索自己记录的（零依赖全文搜索） ==========
    遍历所有模块所有字段，多关键词空格分隔取 AND；命中给分排序；
    点结果复用 jumpToEvidence 跳到原记录并高亮。 */
-const SEARCH={ q:'', mod:'ALL' };
+const SEARCH={ q:'', mod:'ALL', domain:'' };
+/* P2-1 领域软标签：收集所有出现过的领域 + 取某领域的全部记录（同搜索结果结构） */
+function allDomains(){
+  const set=new Set();
+  MODULES.forEach(m=>(DB[m.id]||[]).forEach(r=>{ if(Array.isArray(r.domain)) r.domain.forEach(d=>set.add(d)); }));
+  return [...set].sort();
+}
+function domainRecords(domain){
+  if(!domain) return [];
+  const out=[];
+  MODULES.forEach(m=>{
+    if(SEARCH.mod&&SEARCH.mod!=='ALL'&&m.id!==SEARCH.mod) return;
+    (DB[m.id]||[]).forEach((r,idx)=>{
+      if(!Array.isArray(r.domain)||r.domain.indexOf(domain)<0) return;
+      const fields=(m.fields||[]).map(f=>({label:f.l,key:f.k,val:String(r[f.k]==null?'':r[f.k])}));
+      const primary=fields.find(f=>f.val&&['date','at','title','claim','thing','situation','dim'].indexOf(f.key)>=0)||fields.find(f=>f.val);
+      out.push({m:m.id,mname:m.name,color:m.c,idx,key:recKey(m.id,r),score:0,
+        snippet:primary?primary.val:'',label:primary?primary.label:'',domain:(r.domain||[]).slice()});
+    });
+  });
+  return out;
+}
 function searchRecords(q, mod){
   const kws=String(q||'').trim().toLowerCase().split(/\s+/).filter(Boolean);
   if(!kws.length) return [];
@@ -3119,13 +3659,32 @@ function markKw(text, kws){
 }
 function renderSearch(){
   const kws=SEARCH.q.trim().toLowerCase().split(/\s+/).filter(Boolean);
-  // 筛选 chips
-  $('#searchFilters').innerHTML='<button class="sf-chip '+(SEARCH.mod==='ALL'?'on':'')+'" data-sf="ALL">全部</button>'+
+  const doms=allDomains();
+  const modChips='<button class="sf-chip '+(SEARCH.mod==='ALL'?'on':'')+'" data-sf="ALL">全部</button>'+
     MODULES.filter(m=>(DB[m.id]||[]).length).map(m=>'<button class="sf-chip '+(SEARCH.mod===m.id?'on':'')+'" data-sf="'+m.id+'">'+esc(m.name.split(' ')[0])+'</button>').join('');
+  const domChips=doms.length? '<span class="sf-sep">领域切片：</span>'+
+    '<button class="sf-chip '+(SEARCH.domain===''?'on':'')+'" data-dom="">不限</button>'+
+    doms.map(d=>'<button class="sf-chip '+(SEARCH.domain===d?'on':'')+'" data-dom="'+esc(d)+'">◇ '+esc(d)+'</button>').join('') : '';
+  $('#searchFilters').innerHTML=modChips+(domChips?'<div class="dom-row">'+domChips+'</div>':'');
   const box=$('#searchResults');
+  // 领域切片下即使没关键词也列出该领域全部；否则走关键词搜索
+  if(SEARCH.domain && !kws.length){
+    $('#fileGridTitle').style.display='none';
+    const res=domainRecords(SEARCH.domain);
+    if(!res.length){ box.innerHTML='<div class="empty">「'+esc(SEARCH.domain)+'」这个领域还没有记录</div>'; return; }
+    box.innerHTML='<div class="search-meta">领域「'+esc(SEARCH.domain)+'」· '+res.length+' 条 · 点一条跳过去</div><div class="search-results">'+
+      res.map(r=>'<div class="sr-item" data-jump="'+r.m+'|'+esc(r.key)+'"><div class="sr-top"><span class="sr-mod" style="color:var(--'+r.color+');border-color:var(--'+r.color+')">'+esc(r.mname.split(' ')[0])+'</span>'+
+      '<span class="sr-key">'+esc(r.key||'（无主键）')+'</span><span class="sr-hint">查看 →</span></div>'+
+      '<div class="sr-snip">'+(r.label?'<b>'+esc(r.label)+'：</b>':'')+esc(r.snippet)+'</div></div>').join('')+'</div>';
+    return;
+  }
   if(!kws.length){ box.innerHTML=''; $('#fileGridTitle').style.display=''; return; }
   $('#fileGridTitle').style.display='none';
-  const res=searchRecords(SEARCH.q, SEARCH.mod);
+  let res=searchRecords(SEARCH.q, SEARCH.mod);
+  if(SEARCH.domain) res=res.filter(r=>{
+    const idx=findRecord(r.m,r.key), rec=idx>=0?(DB[r.m]||[])[idx]:null;
+    return rec&&Array.isArray(rec.domain)&&rec.domain.indexOf(SEARCH.domain)>=0;
+  });
   if(!res.length){ box.innerHTML='<div class="empty">没搜到「'+esc(SEARCH.q)+'」<br>换个词试试，或点「全部」放宽筛选</div>'; return; }
   box.innerHTML='<div class="search-meta">找到 '+res.length+' 条记录 · 点一条跳过去查看</div><div class="search-results">'+
     res.map(r=>'<div class="sr-item" data-jump="'+r.m+'|'+esc(r.key)+'">'+
@@ -3396,6 +3955,8 @@ function handleAlertAct(act){
   if(act.act) act=act.act;  // 调用点传的是整条提醒，动作藏在 .act 里
   $('#alertPop').hidden=true;
   if(act.type==='distill'){ makeDistillDraft(act.m); return; }
+  if(act.type==='grace'){ GRACE.dismissed=true; setView('board'); renderAll();
+    toast('旧项都在，慢慢来','顺延7天',()=>graceDefer()); return; }
   if(act.type==='goto'){
     if(act.m==='L5'){
       setView('board');
@@ -3421,25 +3982,62 @@ function dismissGuide(){ try{ localStorage.setItem('wanjie.guide.v2','1'); }catc
 }
 
 /* ---------- 6. 写入流程 ---------- */
+/* P1-6 健康度埋点：只累加不考核，任何异常都不能影响正常写入 */
+function bumpHealth(k,n){
+  try{ if(!DB.health) DB.health={}; DB.health[k]=(Number(DB.health[k])||0)+(n==null?1:n); save(); }catch(e){}
+}
+/* P1-1 风险分级：低风险=日常记录（可清单批勾），高风险=认知跃迁（逐条精审） */
+const LOW_RISK=new Set(['L0','D','POOL','L2O']);
+const MEM_LOW=true; // 常规记忆写入按低风险处理
+function isLowRisk(op){
+  if(op.mem) return MEM_LOW;
+  return LOW_RISK.has(op.m);
+}
 function draft(ops,notes,note,memWrite){
   ops=ops||[]; notes=notes||[];
   if(!ops.length && !memWrite){ toast(note||'没解析出可写的内容'); return; }
-  PENDING={ops,notes,note,memWrite:memWrite||null};
+  PENDING={ops,notes,note,memWrite:memWrite||null,_t:Date.now()};
+  bumpHealth('drafts',1);
   const p=$('#pending');
-  let h='<h4>AI 起草 · 待你点头</h4>';
-  (ops||[]).forEach(op=>{
-    const m=M[op.m]; if(!m) return;
+  const low=[], high=[];
+  (ops||[]).forEach((op,i)=>{ (isLowRisk(op)?low:high).push({op,i}); });
+  let h='<h4>AI 起草 · 待你点头</h4>'+
+    '<div class="p-hint">按影响分了两栏：日常记录可一次勾选，判断/算法/共识要逐条看清。每条都算你点了一次头。</div>';
+  const line=(op,i)=>{
+    const m=M[op.m]; if(!m) return '';
     const v=validate(op.m,op.rec);
-    h+='<div class="p-line">→ <b>'+esc(m.name)+'</b>　'+m.fields.filter(f=>op.rec[f.k]).map(f=>esc(f.l)+'：'+esc(op.rec[f.k])).join('　/　')+'</div>';
-    if(v.errors.length) h+='<div class="alert">硬拦：'+v.errors.map(esc).join('；')+'</div>';
-    if(v.warns.length) h+='<div class="p-line">提示：'+v.warns.map(esc).join('；')+'</div>';
-  });
-  if(memWrite) h+='<div class="p-line mem-write">◇ 记住到 <b>「'+esc(MEM_LABEL[memWrite.block]||memWrite.block)+'」</b>：'+esc(memWrite.value)+'</div>';
+    const KEY={L1:['text'],L3A:['hypothesis','acceptance','fact','interpret'],L3B:['claim','due','metric','opponent'],
+               L4A:['trigger','action','exit'],L4B:['occasion','order','breakpoint'],
+               C:['tier','text','sources','confirmedAt'],VERIFY:['name'],L2W:['source']};
+    const keys=KEY[op.m]||[];
+    const fields=m.fields.filter(f=>op.rec[f.k]).map(f=>{
+      const strong=keys.indexOf(f.k)>=0;
+      return '<span class="'+(strong?'pf-key':'')+'">'+esc(f.l)+'：'+esc(op.rec[f.k])+'</span>';
+    }).join('　/　');
+    const bad=v.errors.length>0;
+    return '<label class="p-item'+(bad?' p-bad':'')+'" data-risk="'+(isLowRisk(op)?'low':'high')+'">'+
+      '<input type="checkbox" class="p-chk" data-pi="'+i+'" '+(bad?'disabled':'checked')+'>'+
+      '<span class="p-item-b"><b>'+esc(m.name)+'</b>　'+fields+'</span>'+
+      (bad?'<span class="p-bad-tag">硬拦 · 不可写</span>':'')+
+      (v.errors.length?'<span class="alert">'+v.errors.map(esc).join('；')+'</span>':'')+
+      (v.warns.length?'<span class="p-warn">提示：'+v.warns.map(esc).join('；')+'</span>':'')+
+      '</label>';
+  };
+  if(low.length){
+    h+='<div class="p-group"><div class="p-group-h">日常记录 · 可一次勾选 <button type="button" class="p-all" data-pall="low">全选/全不选</button></div>'+
+       low.map(x=>line(x.op,x.i)).join('')+'</div>';
+  }
+  if(high.length){
+    h+='<div class="p-group p-high"><div class="p-group-h">判断 / 算法 / 共识 · 逐条精审 <button type="button" class="p-all" data-pall="high">全选/全不选</button></div>'+
+       high.map(x=>line(x.op,x.i)).join('')+'</div>';
+  }
+  if(memWrite) h+='<label class="p-item" data-risk="low"><input type="checkbox" class="p-chk" data-pi="mem" checked>'+
+    '<span class="p-item-b">◇ 记住到 <b>「'+esc(MEM_LABEL[memWrite.block]||memWrite.block)+'」</b>：'+esc(memWrite.value)+'</span></label>';
   notes.forEach(n=>h+='<div class="p-line">'+esc(n)+'</div>');
   if(note) h+='<div class="p-line">'+esc(note)+'</div>';
   const blocked=(ops||[]).some(o=>validate(o.m,o.rec).errors.length);
   h+='<div class="p-actions"><button class="btn" id="pOk" '+(blocked?'disabled style="opacity:.4;cursor:not-allowed"':'')+'>'+
-     (blocked?'有硬拦，不能写入':'确认写入')+'</button><button class="btn gray" id="pNo">作废</button>'+
+     (blocked?'有硬拦，不能写入':'确认写入（勾选的）')+'</button><button class="btn gray" id="pNo">作废</button>'+
      '<span class="p-note">'+(blocked?'改好说法再发一次':'写入后数据只存本机 · 记得定期备份')+'</span></div>';
   p.innerHTML=h; p.hidden=false;
 }
@@ -3447,14 +4045,33 @@ function commit(){
   if(!PENDING) return;
   const blocked=(PENDING.ops||[]).some(o=>validate(o.m,o.rec).errors.length);
   if(blocked){ toast('有硬拦，未写入'); return; }
-  const n=(PENDING.ops||[]).length;
-  const mw=PENDING.memWrite;
-  if(!n && !mw){ $('#pending').hidden=true; PENDING=null; return; }
+  // P1-1：读取勾选的子集。无勾选框时（程序调用/测试沙箱）默认全写，保持兼容
+  const boxes=typeof document!=='undefined'? $$('#pending .p-chk') : [];
+  let pickedOps=PENDING.ops, doMem=!!PENDING.memWrite;
+  if(boxes.length){
+    pickedOps=[];
+    boxes.forEach(b=>{ if(!b.checked||b.disabled) return;
+      const i=b.dataset.pi;
+      if(i==='mem') doMem=true; else pickedOps.push(PENDING.ops[+i]);
+    });
+    doMem=doMem && boxes.some(b=>b.dataset.pi==='mem'&&b.checked);
+  }
+  const n=pickedOps.length;
+  const mw=doMem?PENDING.memWrite:null;
+  if(!n && !mw){ toast('一条都没勾，什么也没写'); $('#pending').hidden=true; PENDING=null; return; }
+  // P1-6 健康度：草稿→落盘的耗时、实写条数（草稿修改率 = drafts 与 commits 的差）
+  bumpHealth('commits',n+(mw?1:0));
+  if(PENDING._t){ bumpHealth('commitMs',Math.min(300000,Date.now()-PENDING._t)); bumpHealth('commitN',1); }
   // 撤销快照：记录每个受影响模块写入前的长度 + 记忆块旧值
-  const before={}; (PENDING.ops||[]).forEach(o=>{ if(M[o.m]&&before[o.m]===undefined) before[o.m]=DB[o.m].length; });
-  const firstMods=[...new Set((PENDING.ops||[]).map(o=>o.m))].filter(m=>M[m]);  // v2 首次反馈用，PENDING 清零前先存
+  const before={}; pickedOps.forEach(o=>{ if(M[o.m]&&before[o.m]===undefined) before[o.m]=DB[o.m].length; });
+  const firstMods=[...new Set(pickedOps.map(o=>o.m))].filter(m=>M[m]);  // v2 首次反馈用，PENDING 清零前先存
   const memBefore=mw?DB.memory[mw.block]:null;
-  (PENDING.ops||[]).forEach(o=>{ if(M[o.m]) DB[o.m].push(o.rec); });
+  const nowISO=new Date().toISOString();
+  pickedOps.forEach(o=>{ if(M[o.m]){
+    if(!o.rec.createdAt) o.rec.createdAt=nowISO;   // P1-5 版本起点，只补一次
+    o.rec.updatedAt=nowISO;
+    DB[o.m].push(o.rec);
+  } });
   if(mw){
     const old=(memBefore||'').trim();
     DB.memory[mw.block]=old? old+'\n'+mw.value : mw.value;
@@ -3497,6 +4114,7 @@ function openModule(id){ CUR=id; CARD=null; renderMap();renderDrawer(); }
 function jumpToEvidence(m,k){
   if(!M[m]) return;
   const idx=findRecord(m,k);
+  if(typeof setMapMode==='function') setMapMode('neuro'); // 从辅助视图跳回时先恢复神经元画布
   setView('map'); CUR=m; CARD=null;
   // 自动展开「现有记录」段和那张卡片，保证跳转后能看到证据
   DRAWER_FOLDS[m]=DRAWER_FOLDS[m]||{}; DRAWER_FOLDS[m].records=true;
@@ -3627,6 +4245,11 @@ function initMapNav(){
   const lt=$('#layoutBtn'),lr=$('#layoutReset');
   if(lt) lt.onclick=()=>tidyLayout();
   if(lr) lr.onclick=()=>resetLayout();
+  const ve=$('#viewEvidence'),vm=$('#viewMatrix'),mb=$('#mavBack'),mb2=$('#mavBack2');
+  if(ve) ve.onclick=()=>setMapMode('evidence');
+  if(vm) vm.onclick=()=>setMapMode('matrix');
+  if(mb) mb.onclick=()=>setMapMode('neuro');
+  if(mb2) mb2.onclick=()=>setMapMode('neuro');
   // 背景与画布固定不动：不监听滚轮缩放、不监听空白拖拽平移
   // 只在窗口尺寸变化时重新计算 fit，让整张图随页面缩放
   if(typeof window!=='undefined'&&window.addEventListener) window.addEventListener('resize',applyTransform);
@@ -3664,12 +4287,22 @@ function clearFocus(){
 document.addEventListener('click',e=>{
   if(e.target.closest&&e.target.closest('button')) haptic(6);
   ripple(e);
+  // P2-2 证据子图：选焦点
+  const ef=e.target.closest('[data-evfocus]');
+  if(ef){ const p=ef.dataset.evfocus.split('|');
+    const idx=findRecord(p[0],p[1]); EV_FOCUS={m:p[0],key:p[1],idx}; renderEvidenceView(); return; }
   // 阶段4：证据链跳转
   const ev=e.target.closest('[data-ev]');
   if(ev){ const p=ev.dataset.ev.split('|'); jumpToEvidence(p[0],p[1]); return; }
   // 阶段4：一键提炼
   const ds=e.target.closest('[data-distill]');
   if(ds){ if(ds.disabled) return; makeDistillDraft(ds.dataset.distill); return; }
+  // P2-3 生成体检简报（只读）
+  if(e.target.closest('#genCheckup')){
+    CHECKUP_RESULT={at:new Date().toLocaleString('zh-CN'),items:cognitiveCheckup()};
+    DRAWER_FOLDS.L5=DRAWER_FOLDS.L5||{}; DRAWER_FOLDS.L5.checkup=true;
+    renderDrawer(); toast('体检简报已生成 · 只读，没写任何库'); return;
+  }
   // 阶段4：提醒动作（三处共用同一份 systemAlerts 索引）
   const aa=e.target.closest('[data-alert-act]');
   if(aa){ const a=systemAlerts()[+aa.dataset.alertAct]; handleAlertAct(a); return; }
@@ -3684,6 +4317,7 @@ document.addEventListener('click',e=>{
   if(e.target.closest('#alertPop')){ return; } // 浮层内部点击不冒泡到画布拖拽
   const tab=e.target.closest('.tab'); if(tab){ setView(tab.dataset.view); return; }
   const sf=e.target.closest('[data-sf]'); if(sf){ SEARCH.mod=sf.dataset.sf; renderSearch(); return; }
+  const domChip=e.target.closest('[data-dom]'); if(domChip){ SEARCH.domain=domChip.dataset.dom; renderSearch(); return; }
   const sj=e.target.closest('[data-jump]'); if(sj){ const p=sj.dataset.jump.split('|'); jumpToEvidence(p[0],p[1]); return; }
   if(e.target.closest('#searchClear')){ SEARCH.q=''; $('#searchInput').value=''; renderSearch(); $('#searchInput').focus(); return; }
   const opener=e.target.closest('[data-open]'); if(opener){ setView('map'); openModule(opener.dataset.open); return; }
@@ -3699,8 +4333,12 @@ document.addEventListener('click',e=>{
   const recBtn=e.target.closest('[data-rec-open]');
   if(recBtn){ toggleRec(CUR,+recBtn.dataset.recOpen); return; }
   const themeCard=e.target.closest('.theme-card[data-theme]'); if(themeCard){ setTheme(themeCard.dataset.theme); return; }
-  if(e.target.closest('#pNo')){ $('#pending').hidden=true; PENDING=null; return; }
+  if(e.target.closest('#pNo')){ bumpHealth('abandoned',1); $('#pending').hidden=true; PENDING=null; return; }
   if(e.target.closest('#pOk')){ commit(); haptic(18); blip(); return; }
+  const pall=e.target.closest('[data-pall]');
+  if(pall){ const risk=pall.dataset.pall;
+    $$('#pending .p-chk').forEach(b=>{ const row=b.closest('.p-item');
+      if(row&&row.dataset.risk===risk&&!b.disabled) b.checked=!b.checked; }); return; }
   if(e.target.closest('#chatClear')){ clearChat(); return; }
   if(e.target.closest('#sessClose')){ toggleSessionPanel(false); return; }
   if(e.target.closest('#sessOpen')){ toggleSessionPanel(); return; }
@@ -3942,6 +4580,7 @@ async function sendDock(){
   if(files.length) CHAT.push({role:'sys',content:'本轮附了 '+files.length+' 个文件：'+files.map(f=>f.name).join('、')+'（只作上下文，不写入记录）'});
   // 上下文工程：消息超阈值时把较早对话压成摘要，再取最近 N 轮
   maybeCompact();
+  if(!isDraft && typeof semanticRecall==='function'){ try{ await semanticRecall(t,6); }catch(e){} } // P2-4 可选语义召回，失败静默回退
   renderChat();
   try{
     let r;
@@ -3981,6 +4620,7 @@ load();
 CHAT=(currentSession()&&Array.isArray(currentSession().messages))?currentSession().messages.slice():[]; // 恢复当前会话
 FILLING=DB.filling||null;                          // 恢复未完成的追问
 refreshQuota();                                    // 跨周重置额度
+computeGrace();                                    // P1-2 断更/超期判定（算完即刷新 lastOpen）
 const qcInit=$('#quotaChip'); if(qcInit) qcInit.innerHTML='模型调用 <b>'+DB.settings.quotaUsed+' / '+DB.settings.quota+' 本周</b>';
 initPositions();
 initCardPos();

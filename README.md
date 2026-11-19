@@ -144,6 +144,25 @@ wanjie/
 见 `PLAN.md`。8 步全部完成：Agent 对话机制、记忆闭环、模型中心、本地 Docker + 数据落卷、
 检索自己记录的、开源发布、外观去 AI 味（观测台语言已回并到主线）。
 
+v1.1.0 基于三方审查校准，补齐了"读路径"（历史档案参与对话）、数据主权加固，以及预测校准 /
+健康度 / 风险分级确认 / 领域软标签 / 可选本地语义检索等增强。详见 `CHANGELOG.md`。
+`npm test` 143 项全部通过。
+
+## 可选：本地语义检索（默认关闭）
+
+关键词检索零依赖、离线可用。想要"按意思找相似经历"时，可复用本机 Ollama / LM Studio 的
+embedding 端点，在启动代理前设置：
+
+```bash
+WANJIE_EMBED=1 \
+WANJIE_EMBED_URL=http://localhost:11434/v1 \
+WANJIE_EMBED_MODEL=nomic-embed-text \
+node ai-proxy.js
+```
+
+未设置或连接失败时自动回退到关键词检索，不影响任何功能。若填的是云端 URL，界面会提示
+"档案文本将发往该服务"，请自行确认数据边界。
+
 ## License
 
 MIT · 见 `LICENSE`。

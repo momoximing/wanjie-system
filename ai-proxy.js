@@ -35,19 +35,102 @@ const DATA_DIR = path.resolve(process.env.WANJIE_DATA_DIR || path.join(DIR, 'dat
 const DATA_FILE = path.join(DATA_DIR, 'db.json');
 const MODELS_FILE = process.env.WANJIE_MODELS_FILE || path.join(DATA_DIR, 'models.json');
 const PORT = Number(process.env.PORT || 8787);
+/* 网络边界：默认只听回环（局域网连不上）。Docker 里端口映射要求 0.0.0.0，
+   由 docker-compose 显式设 WANJIE_HOST=0.0.0.0，靠容器网络隔离保护。 */
+const HOST = process.env.WANJIE_HOST || '127.0.0.1';
+/* 可选访问令牌：默认空=不启用，保持零配置双击/同源体验不变。
+   设置 WANJIE_TOKEN 后：所有 POST 接口要求 X-Wanjie-Token 头，令牌在托管页面时注入前端。 */
+const TOKEN = process.env.WANJIE_TOKEN || '';
+const KEEP_BAK = 5;                    // 数据文件滚动备份保留份数
+let DATA_CORRUPT = false;              // 主数据文件曾损坏且未能从备份恢复
 const MAX_TURNS = 6;
+/* ---------- P2-4 可选本地 Embedding（默认关闭）----------
+   默认关闭；只有同时设置 WANJIE_EMBED=1 与 WANJIE_EMBED_URL 才启用。
+   只走 OpenAI 兼容 /embeddings 端点；推荐指向本机 Ollama / LM Studio。
+   若填的是云端 URL，属于用户显式授权，前端会给出显眼提示。 */
+const EMBED_ON = process.env.WANJIE_EMBED === '1' && !!process.env.WANJIE_EMBED_URL;
+const EMBED_URL = process.env.WANJIE_EMBED_URL || '';
+const EMBED_MODEL = process.env.WANJIE_EMBED_MODEL || 'nomic-embed-text';
+const EMBED_KEY = process.env.WANJIE_EMBED_KEY || '';
+const EMBED_IS_CLOUD = !/^https?:\/\/(localhost|127\.0\.0\.1|0\.0\.0\.0|\[::1\])/i.test(EMBED_URL);
+const VECTORS_FILE = path.join(DATA_DIR, 'vectors.json');
+let VECTOR_CACHE = null;
+function loadVectors() {
+  if (VECTOR_CACHE) return VECTOR_CACHE;
+  try { const d = JSON.parse(fs.readFileSync(VECTORS_FILE, 'utf8')); VECTOR_CACHE = d && typeof d === 'object' ? d : {}; }
+  catch (e) { VECTOR_CACHE = {}; }
+  return VECTOR_CACHE;
+}
+function saveVectors() {
+  try { atomicWrite(VECTORS_FILE, JSON.stringify(VECTOR_CACHE || {})); } catch (e) {}
+}
+/* 调 embedding 端点，返回向量数组。失败返回 null，由调用方回退关键词检索。 */
+async function embedTexts(texts) {
+  const url = EMBED_URL.replace(/\/$/, '') + '/embeddings';
+  const headers = { 'Content-Type':'application/json' };
+  if (EMBED_KEY) headers['Authorization'] = 'Bearer ' + EMBED_KEY;
+  const r = await fetch(url, { method:'POST', headers,
+    body: JSON.stringify({ model:EMBED_MODEL, input:texts.map(t => String(t).slice(0, 2000)) }) });
+  if (!r.ok) throw new Error('embedding 接口 ' + r.status);
+  const data = await r.json().catch(() => ({}));
+  const list = Array.isArray(data.data) ? data.data : [];
+  // 按 index 归位（OpenAI 兼容格式）
+  const out = new Array(texts.length);
+  list.forEach(x => { if (typeof x.index === 'number' && Array.isArray(x.embedding)) out[x.index] = x.embedding; });
+  return out.every(v => Array.isArray(v)) ? out : null;
+}
+function cosine(a, b) {
+  if (!Array.isArray(a) || !Array.isArray(b) || a.length !== b.length) return 0;
+  let dot = 0, na = 0, nb = 0;
+  for (let i = 0; i < a.length; i++) { dot += a[i] * b[i]; na += a[i] * a[i]; nb += b[i] * b[i]; }
+  return (na && nb) ? dot / (Math.sqrt(na) * Math.sqrt(nb)) : 0;
+}
 
-/* ---------- 数据落盘：建目录 + 原子写 ---------- */
+/* ---------- 数据落盘：建目录 + 原子写 + 滚动快照 + 损坏回滚 ---------- */
 function ensureDataDir() { try { fs.mkdirSync(DATA_DIR, { recursive:true }); } catch (e) {} }
 function atomicWrite(file, text) {
   ensureDataDir();
+  // 写前把当前完好文件轮转一份 .bak.N（保留最近 5 份），再原子替换主文件。
+  // 这样即使新内容写坏，也有历史版本可回滚。备份失败不阻断主写入。
+  try {
+    if (fs.existsSync(file)) {
+      for (let i = KEEP_BAK - 1; i >= 1; i--) {
+        const from = file + '.bak.' + i, to = file + '.bak.' + (i + 1);
+        if (fs.existsSync(from)) fs.renameSync(from, to);
+      }
+      fs.copyFileSync(file, file + '.bak.1');
+    }
+  } catch (e) {}
   const tmp = file + '.tmp.' + process.pid;
   fs.writeFileSync(tmp, text, 'utf8');
   fs.renameSync(tmp, file); // 同分区 rename 是原子的，避免半写损坏
 }
+function parseDataFile(file) {
+  try {
+    const d = JSON.parse(fs.readFileSync(file, 'utf8'));
+    return d && typeof d === 'object' && !Array.isArray(d) ? d : null;
+  } catch (e) { return null; }
+}
 function loadData() {
-  try { const d = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8')); return d && typeof d === 'object' ? d : null; }
-  catch (e) { return null; }
+  const main = parseDataFile(DATA_FILE);
+  if (main) { DATA_CORRUPT = false; return main; }
+  // 主文件损坏或不存在 → 只从备份恢复，绝不返回 null 让前端把空数据推上去覆盖。
+  DATA_CORRUPT = !!fs.existsSync(DATA_FILE);   // 存在但解析失败 = 真损坏
+  if (fs.existsSync(DATA_FILE)) {
+    try { fs.copyFileSync(DATA_FILE, DATA_FILE + '.corrupt.' + Date.now()); } catch (e) {}
+  }
+  for (let i = 1; i <= KEEP_BAK; i++) {
+    const bak = parseDataFile(DATA_FILE + '.bak.' + i);
+    if (bak) {
+      try {
+        fs.copyFileSync(DATA_FILE + '.bak.' + i, DATA_FILE);  // 恢复到主文件
+        DATA_CORRUPT = false;
+        console.log('数据文件损坏，已从 .bak.' + i + ' 自动恢复');
+      } catch (e) {}
+      return bak;
+    }
+  }
+  return null; // 主文件与全部备份都没有 → 真是首次使用
 }
 function saveData(obj) { atomicWrite(DATA_FILE, JSON.stringify(obj)); }
 /* 从旧位置迁移 models.json（升级前在 DIR 根目录） */
@@ -229,6 +312,14 @@ function opsFromDraft(obj) {
   if (!Array.isArray(list)) return [];
   return list.filter(o => o && o.m).map(o => ({ m:String(o.m).toUpperCase(), rec:o.rec || {} }));
 }
+/* 档案召回：把前端本机检索到的相关旧记录拼进系统提示，让模型"想起"历史。
+   只读参考，绝不作为写入依据；条数与字数都设上限，防止撑爆上下文。 */
+function archiveBlock(archive) {
+  const list = (Array.isArray(archive) ? archive : []).slice(0, 6);
+  if (!list.length) return '';
+  const lines = list.map(a => '- [' + String(a.mname || a.m || '记录') + '] ' + String(a.snippet || '').slice(0, 160));
+  return '\n\n【从用户档案里找到的相关旧记录（只读参考，可用于回答和起草证据链；不要当成新事实写库，没有依据别编造）：】\n' + lines.join('\n');
+}
 
 async function runAgent(cfg, input) {
   const system = input.system || '你是万界系统的录入助手。';
@@ -238,7 +329,8 @@ async function runAgent(cfg, input) {
   const sysMsg = system + '\n\n今天：' + (context.today || new Date().toISOString().slice(0, 10)) +
     '\n现有条数：' + JSON.stringify(context.counts || {}) +
     '\n\n你可以在需要时用工具起草记录（工具只生成草稿，写入要用户点头）。' +
-    '缺关键信息时先用自然语言追问，别替用户编造。';
+    '缺关键信息时先用自然语言追问，别替用户编造。' +
+    archiveBlock(context.archive);
   const files = Array.isArray(context.files) ? context.files.slice(0, 5) : [];
   const fileNote = files.length
     ? '\n\n用户附加了这些本地文件（只作本轮上下文，不要据此自动写入记录；要写入必须用工具起草并等用户确认）：\n' +
@@ -337,15 +429,66 @@ async function testModel(cfg) {
   return { ok:true, ms:Date.now() - t0, text:out.text.slice(0, 60) || '（收到回复）' };
 }
 
-/* ---------- HTTP ---------- */
-const CORS = {
-  'Access-Control-Allow-Origin':'*',
-  'Access-Control-Allow-Methods':'GET, POST, OPTIONS',
-  'Access-Control-Allow-Headers':'Content-Type'
-};
-function json(res, code, obj) {
-  res.writeHead(code, Object.assign({ 'Content-Type':'application/json; charset=utf-8' }, CORS));
+/* ---------- 网络边界：只接受本机来源，防跨站读取与 DNS rebinding ---------- */
+function localHostname(h) {
+  h = String(h || '').toLowerCase().replace(/:\d+$/, ''); // 去端口
+  return h === 'localhost' || h === '127.0.0.1' || h === '::1' || h === '[::1]' || h === '';
+}
+function localOrigin(origin) {
+  if (!origin) return true;                    // 无 Origin：同源请求 / curl / Node 测试，放行
+  if (origin === 'null') return true;          // file:// 双击打开，放行
+  try {
+    const u = new URL(origin);
+    return localHostname(u.hostname);
+  } catch (e) { return false; }
+}
+function hostOK(req) {
+  if (localHostname(req.headers.host)) return true;
+  return !!TOKEN;   // 显式设了令牌=用户主动开放，允许非本机 Host，但仍须带令牌
+}
+function tokenOK(req) {
+  if (!TOKEN) return true;                      // 未设令牌 → 只靠本机边界
+  return req.headers['x-wanjie-token'] === TOKEN;
+}
+function corsFor(req) {
+  const origin = req.headers.origin;
+  const allow = (origin && origin !== 'null' && localOrigin(origin)) ? origin
+    : (origin === 'null' ? 'null' : 'http://localhost:' + PORT);
+  return {
+    'Access-Control-Allow-Origin': allow,
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, X-Wanjie-Token',
+    'Vary': 'Origin'
+  };
+}
+function json(req, res, code, obj) {
+  res.writeHead(code, Object.assign({ 'Content-Type':'application/json; charset=utf-8' }, corsFor(req)));
   res.end(JSON.stringify(obj));
+}
+/* API 门禁：页面本身不拦（地址栏导航无 Origin），接口一律过本机边界 + 令牌校验 */
+function apiGate(req, res, url) {
+  const isPage = req.method === 'GET' &&
+    (url === '/' || url === '/index.html' || /^\/[A-Za-z0-9_\-]+\.html$/.test(url));
+  if (isPage) return true;
+  if (!hostOK(req) || !localOrigin(req.headers.origin)) {
+    json(req, res, 403, { ok:false, error:'仅限本机访问（跨站或外部 Host 被拒绝）' }); return false;
+  }
+  // /health 只暴露无害状态（模型数/数据目录/是否需令牌），不含记录内容；
+  // 免令牌放行，保证前端能探测到服务端模式。真正的数据/对话接口仍要令牌。
+  if (url === '/health') return true;
+  if (!tokenOK(req)) {
+    json(req, res, 401, { ok:false, error:'访问令牌无效' }); return false;
+  }
+  return true;
+}
+/* 注入前端的令牌脚本：仅当设置了 WANJIE_TOKEN 时，页面内所有 fetch 自动带令牌头 */
+function tokenInject() {
+  if (!TOKEN) return '';
+  return '<script>window.__WANJIE_TOKEN__=' + JSON.stringify(TOKEN) + ';'
+    + '(function(){var f=window.fetch;window.fetch=function(u,o){o=o||{};'
+    + 'var h={};var oh=o.headers||{};if(oh&&oh.forEach){oh.forEach(function(v,k){h[k]=v;});}'
+    + 'else{for(var k in oh)h[k]=oh[k];}h["X-Wanjie-Token"]=window.__WANJIE_TOKEN__;'
+    + 'var n={};for(var p in o)n[p]=o[p];n.headers=h;return f(u,n);};})();</script>';
 }
 function readBody(req) {
   return new Promise((resolve, reject) => {
@@ -357,14 +500,16 @@ function readBody(req) {
 }
 
 const server = http.createServer(async (req, res) => {
-  if (req.method === 'OPTIONS') { res.writeHead(204, CORS); return res.end(); }
+  if (req.method === 'OPTIONS') { res.writeHead(204, corsFor(req)); return res.end(); }
   const url = (req.url || '/').split('?')[0];
+  if (!apiGate(req, res, url)) return;
 
   if (req.method === 'GET' && (url === '/' || url === '/index.html')) {
-    return fs.readFile(path.join(DIR, 'index.html'), (err, buf) => {
+    return fs.readFile(path.join(DIR, 'index.html'), 'utf8', (err, html) => {
       if (err) { res.writeHead(404); return res.end('index.html not found'); }
+      if (TOKEN) html = html.replace('</head>', tokenInject() + '</head>');
       res.writeHead(200, { 'Content-Type':'text/html; charset=utf-8', 'Cache-Control':'no-cache, no-store, must-revalidate' });
-      res.end(buf);
+      res.end(html);
     });
   }
   // 托管目录内其它 .html（本地测试页 / 自定义页面）
@@ -378,42 +523,64 @@ const server = http.createServer(async (req, res) => {
   }
   if (req.method === 'GET' && url === '/health') {
     const list = loadModels();
-    return json(res, 200, {
+    return json(req, res, 200, {
       ok:true, models:list.length, default:(pickModel(list) || {}).id || '', port:PORT,
-      storage:'server', dataDir:DATA_DIR, hasData:!!loadData(), version:2
+      storage:'server', dataDir:DATA_DIR, hasData:!!loadData(), version:2,
+      needToken:!!TOKEN, recovered:DATA_CORRUPT===false && !!loadData(), dataCorrupt:DATA_CORRUPT,
+      embed:{enabled:EMBED_ON, model:EMBED_ON?EMBED_MODEL:'', cloud:EMBED_ON?EMBED_IS_CLOUD:false}
     });
+  }
+  /* ---------- P2-4 可选 Embedding：文本 → 向量（带本地缓存） ---------- */
+  if (req.method === 'POST' && url === '/embed') {
+    if (!EMBED_ON) return json(req, res, 200, { ok:false, enabled:false, reason:'未启用（需 WANJIE_EMBED=1 和 WANJIE_EMBED_URL）' });
+    let input;
+    try { input = await readBody(req); } catch (e) { return json(req, res, 400, { ok:false, error:'请求体不是 JSON' }); }
+    const texts = Array.isArray(input.texts) ? input.texts.map(x => String(x).slice(0, 2000)).slice(0, 64) : [];
+    if (!texts.length) return json(req, res, 200, { ok:true, enabled:true, vectors:[] });
+    const cache = loadVectors();
+    const miss = [], idxs = [];
+    texts.forEach((t, i) => { const k = EMBED_MODEL + '|' + t; if (Array.isArray(cache[k])) { /* hit */ } else { miss.push(t); idxs.push(i); } });
+    if (miss.length) {
+      try {
+        const vs = await embedTexts(miss);
+        if (vs) vs.forEach((v, j) => { cache[EMBED_MODEL + '|' + miss[j]] = v; });
+        if (vs) saveVectors();
+      } catch (e) { return json(req, res, 200, { ok:false, enabled:true, error:String(e.message).slice(0,160) }); }
+    }
+    const vecs = texts.map(t => cache[EMBED_MODEL + '|' + t] || null);
+    return json(req, res, 200, { ok:true, enabled:true, model:EMBED_MODEL, cloud:EMBED_IS_CLOUD, vectors:vecs });
   }
   /* ---------- 数据持久化：网页记录落到数据卷 ---------- */
   if (req.method === 'GET' && url === '/data') {
     const d = loadData();
-    return json(res, 200, { ok:true, data:d });
+    return json(req, res, 200, { ok:true, data:d });
   }
   if (req.method === 'POST' && url === '/data') {
     let input;
     try { input = await readBody(req); }
-    catch (e) { return json(res, 400, { ok:false, error:'请求体不是 JSON' }); }
+    catch (e) { return json(req, res, 400, { ok:false, error:'请求体不是 JSON' }); }
     const data = input && input.data;
     if (!data || typeof data !== 'object' || Array.isArray(data)) {
-      return json(res, 400, { ok:false, error:'data 必须是对象' });
+      return json(req, res, 400, { ok:false, error:'data 必须是对象' });
     }
     try {
       saveData(data);
-      return json(res, 200, { ok:true, savedAt:new Date().toISOString(), bytes:fs.statSync(DATA_FILE).size });
+      return json(req, res, 200, { ok:true, savedAt:new Date().toISOString(), bytes:fs.statSync(DATA_FILE).size });
     } catch (e) {
-      return json(res, 500, { ok:false, error:'写数据失败：' + ((e && e.message) || e) });
+      return json(req, res, 500, { ok:false, error:'写数据失败：' + ((e && e.message) || e) });
     }
   }
   if (req.method === 'GET' && url === '/presets') {
-    return json(res, 200, { ok:true, presets:PRESETS });
+    return json(req, res, 200, { ok:true, presets:PRESETS });
   }
   if (req.method === 'GET' && url === '/models') {
     const list = loadModels();
-    return json(res, 200, { ok:true, models:list.map(publicModel), defaultId:(pickModel(list) || {}).id || '', file:MODELS_FILE });
+    return json(req, res, 200, { ok:true, models:list.map(publicModel), defaultId:(pickModel(list) || {}).id || '', file:MODELS_FILE });
   }
   if (req.method === 'POST' && url === '/models') {
     let input;
     try { input = await readBody(req); }
-    catch (e) { return json(res, 400, { ok:false, error:'请求体不是 JSON' }); }
+    catch (e) { return json(req, res, 400, { ok:false, error:'请求体不是 JSON' }); }
     const list = loadModels();
     const action = input.action || 'save';
     if (action === 'save') {
@@ -432,52 +599,54 @@ const server = http.createServer(async (req, res) => {
       });
       if (next.length && !next.some(m => m.isDefault)) next[0].isDefault = true;
       try { saveModels(next); }
-      catch (e) { return json(res, 500, { ok:false, error:'写 models.json 失败：' + e.message }); }
-      return json(res, 200, { ok:true, models:next.map(publicModel), defaultId:(pickModel(next) || {}).id || '' });
+      catch (e) { return json(req, res, 500, { ok:false, error:'写 models.json 失败：' + e.message }); }
+      return json(req, res, 200, { ok:true, models:next.map(publicModel), defaultId:(pickModel(next) || {}).id || '' });
     }
     if (action === 'test') {
       const ref = input.model || (input.id ? { id:input.id } : null);
       const cfg = ref && ref.id ? (list.find(m => m.id === ref.id) || ref) : ref;
-      if (!cfg) return json(res, 400, { ok:false, error:'没指定要测试的模型' });
-      try { return json(res, 200, Object.assign({ ok:true }, await testModel(cfg))); }
-      catch (e) { return json(res, 200, { ok:false, error:(e && e.message) || String(e) }); }
+      if (!cfg) return json(req, res, 400, { ok:false, error:'没指定要测试的模型' });
+      try { return json(req, res, 200, Object.assign({ ok:true }, await testModel(cfg))); }
+      catch (e) { return json(req, res, 200, { ok:false, error:(e && e.message) || String(e) }); }
     }
     if (action === 'fetch') {
       const ref = input.model || (input.id ? { id:input.id } : null);
       const cfg = ref && ref.id ? (list.find(m => m.id === ref.id) || ref) : ref;
-      if (!cfg) return json(res, 400, { ok:false, error:'没指定服务商' });
-      try { return json(res, 200, Object.assign({ ok:true }, await fetchModelList(cfg))); }
-      catch (e) { return json(res, 200, { ok:false, error:(e && e.message) || String(e) }); }
+      if (!cfg) return json(req, res, 400, { ok:false, error:'没指定服务商' });
+      try { return json(req, res, 200, Object.assign({ ok:true }, await fetchModelList(cfg))); }
+      catch (e) { return json(req, res, 200, { ok:false, error:(e && e.message) || String(e) }); }
     }
-    return json(res, 400, { ok:false, error:'未知 action：' + action });
+    return json(req, res, 400, { ok:false, error:'未知 action：' + action });
   }
   if (req.method === 'POST' && (url === '/chat' || url === '/parse')) {
     let input;
     try { input = await readBody(req); }
-    catch (e) { return json(res, 400, { reply:'请求体不是 JSON', ops:[] }); }
+    catch (e) { return json(req, res, 400, { reply:'请求体不是 JSON', ops:[] }); }
     const list = loadModels();
     const cfg = pickModel(list, input.modelId);
     if (!cfg) {
-      return json(res, 200, {
+      return json(req, res, 200, {
         reply:'模型中心还没配模型：打开设置 → 模型中心，添加一个模型（或填 WANJIE_LLM_KEY 后重启）。没配也能用「本地演示」体验追问流程。',
         ops:[], notes:[], demo:true
       });
     }
     try {
       const out = url === '/chat' ? await runAgent(cfg, input) : await runParse(cfg, input);
-      json(res, 200, out);
+      json(req, res, 200, out);
     } catch (e) {
-      json(res, 200, { reply:'网关出错：' + ((e && e.message) || e), ops:[], notes:[] });
+      json(req, res, 200, { reply:'网关出错：' + ((e && e.message) || e), ops:[], notes:[] });
     }
     return;
   }
-  json(res, 404, { ok:false, error:'没有这个接口' });
+  json(req, res, 404, { ok:false, error:'没有这个接口' });
 });
 
-server.listen(PORT, () => {
+server.listen(PORT, HOST, () => {
   const list = loadModels();
   const def = pickModel(list);
-  console.log('万界本机服务： http://localhost:' + PORT);
+  console.log('万界本机服务： http://localhost:' + PORT + '  （监听 ' + HOST + '）');
+  if (HOST === '0.0.0.0') console.log('  注意：监听所有网卡，请确认网络边界（建议只在本机/可信网络使用）');
+  if (TOKEN) console.log('  访问令牌：已启用（前端自动携带，接口需 X-Wanjie-Token）');
   console.log('已配置模型：' + list.length + ' 个' + (def ? '，默认「' + (def.name || def.model) + '」' : '（模型中心还没配）'));
   console.log('数据目录：  ' + DATA_DIR);
   console.log('  记录 → ' + DATA_FILE + (loadData() ? '（已有数据）' : '（空，网页首次打开会写入）'));
