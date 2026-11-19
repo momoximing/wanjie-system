@@ -540,7 +540,7 @@ body.side-open .side-toggle{color:var(--accent);border-color:var(--accent);backg
 .map-hint{display:none}
 .dock-hint{display:none}
 .dock-chips{display:none}              /* 快捷示例默认收起，点「⌄ 示例」展开 */
-.dock-chips.show{display:flex;padding-top:7px}
+.dock-chips.show{display:flex;padding:8px 9px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;margin-top:7px}
 #dockMode{display:none}                /* 模式只在设置页切换 */
 .chip-toggle{border:1px solid var(--line);background:var(--panel2);color:var(--dim);
              border-radius:20px;padding:6px 11px;font-size:11.5px;white-space:nowrap}
@@ -580,7 +580,8 @@ body.side-open .side-toggle{color:var(--accent);border-color:var(--accent);backg
 .msg.sys{align-self:center;max-width:none}
 .msg.sys .bubble{border:0;background:transparent;color:var(--dim);padding:0;font-size:11px;text-align:center}
 /* 对话框顶部：常驻书签栏 */
-.dock-top{display:flex;align-items:center;gap:9px;margin-bottom:7px;padding:0 1px}
+.dock-top{display:flex;align-items:center;gap:9px;margin-bottom:7px;padding:7px 9px;
+  background:var(--panel2);border:1px solid var(--line);border-radius:10px}
 .sess-bookmark{flex:none;width:30px;height:30px;padding:0;display:inline-grid;place-items:center;
   border:1px solid var(--line);background:var(--panel);color:var(--dim);border-radius:8px;cursor:pointer;
   transition:color .18s,border-color .18s,background-color .18s}
@@ -1103,7 +1104,7 @@ button.dock-model:disabled{opacity:.7;cursor:default}
   box-shadow:0 1px 0 rgba(255,255,255,.04) inset,0 14px 34px -22px rgba(0,0,0,.8);
   transition:border-color .16s ease}
 .dock-row:focus-within{border-color:color-mix(in srgb,var(--accent) 55%,var(--line))}
-.dock-top{padding:0 6px 8px}
+.dock-top{padding:7px 9px}
 .dock-hint{padding:8px 6px 0;opacity:.72}
 /* 空态卡：左下对齐、方角、去掉居中毛玻璃 */
 .empty-guide{place-items:end start;padding:0 0 22px 24px}
