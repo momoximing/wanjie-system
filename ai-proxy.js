@@ -645,8 +645,12 @@ server.listen(PORT, HOST, () => {
   const list = loadModels();
   const def = pickModel(list);
   console.log('万界本机服务： http://localhost:' + PORT + '  （监听 ' + HOST + '）');
-  if (HOST === '0.0.0.0') console.log('  注意：监听所有网卡，请确认网络边界（建议只在本机/可信网络使用）');
-  if (TOKEN) console.log('  访问令牌：已启用（前端自动携带，接口需 X-Wanjie-Token）');
+  if (!localHostname(HOST)) {
+    console.log('  ⚠ 监听所有网卡：同一网络任何人都能连到本机端口。');
+    console.log('    令牌只挡跨站浏览器请求，挡不住同网络直接 curl 取页面里的令牌——真正的安全边界是网络绑定。');
+    console.log('    请把 docker-compose.yml 的 ports 改成 "127.0.0.1:' + PORT + ':' + PORT + '"，或只在本机/可信网络使用。');
+  }
+  if (TOKEN) console.log('  访问令牌：已启用（前端自动携带，接口需 X-Wanjie-Token；注意它不能替代网络绑定）');
   console.log('已配置模型：' + list.length + ' 个' + (def ? '，默认「' + (def.name || def.model) + '」' : '（模型中心还没配）'));
   console.log('数据目录：  ' + DATA_DIR);
   console.log('  记录 → ' + DATA_FILE + (loadData() ? '（已有数据）' : '（空，网页首次打开会写入）'));

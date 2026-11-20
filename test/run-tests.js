@@ -188,6 +188,32 @@ async function testHardening() {
   }
 }
 
+function testFeedbackDraft(html) {
+  section('外部反馈草稿 · 合规且未落库');
+  const p = path.join(ROOT, 'examples', 'external-feedback-draft.json');
+  ok('草稿文件存在', fs.existsSync(p));
+  if (!fs.existsSync(p)) return;
+  const draft = JSON.parse(fs.readFileSync(p, 'utf8'));
+  // 草稿就是草稿：带 note 说明待确认，绝不声称已写入
+  ok('草稿标注待确认', /起草|待你确认|未写入/.test(JSON.stringify(draft)));
+  ok('草稿 ops 非空', Array.isArray(draft.ops) && draft.ops.length > 0);
+  // 草稿只放示例目录，不进真实数据卷
+  const db = JSON.parse(fs.readFileSync(path.join(ROOT, 'data', 'db.json'), 'utf8'));
+  ok('反馈未静默写进 db.json', JSON.stringify(db).indexOf('肖钰童') < 0);
+}
+
+function testNetworkBoundary() {
+  section('网络边界 · 本机工具不外暴露');
+  const compose = fs.readFileSync(path.join(ROOT, 'docker-compose.yml'), 'utf8');
+  // 端口必须绑到宿主机回环：局域网机器连不上才是真边界（令牌挡不住同网络直接取页面里的令牌）
+  ok('compose·端口绑定回环 127.0.0.1', /127\.0\.0\.1:\d+:\d+/.test(compose), (compose.match(/-\s*"[^"]*:\d+"/g)||[]).join(' '));
+  ok('compose·无 0.0.0.0 裸映射', !/-\s*"0\.0\.0\.0:\d+:\d+"/.test(compose));
+  const proxy = fs.readFileSync(path.join(ROOT, 'ai-proxy.js'), 'utf8');
+  ok('proxy·外网监听有醒目告警', proxy.indexOf('监听所有网卡') >= 0 && proxy.indexOf('网络绑定') >= 0);
+  ok('proxy·默认绑定回环', /WANJIE_HOST\s*\|\|\s*'127\.0\.0\.1'/.test(proxy));
+  ok('proxy·/models 密钥打码', /function maskKey/.test(proxy) && /keyMask:maskKey/.test(proxy));
+}
+
 function testAgentCore(html) {
   section('Personal Agent 骨架 · 数据迁移 / 意图分流 / 上下文');
   [['会话结构 sessions','DB.sessions'],['工作记忆 memory','DB.memory'],
@@ -466,6 +492,8 @@ function testValidateRules(html) {
   testP1P2Features();
   testProxyTools();
   testSample();
+  testNetworkBoundary();
+  testFeedbackDraft(html);
   try { await testServer(); } catch (e) { fail++; console.log('  \x1b[31m✗ 服务端测试异常:\x1b[0m ' + e.message); }
   try { await testHardening(); } catch (e) { fail++; console.log('  \x1b[31m✗ 加固测试异常:\x1b[0m ' + e.message); }
   console.log('\n' + (fail===0 ? '\x1b[32m' : '\x1b[31m') + '结果：' + pass + ' 通过 / ' + fail + ' 失败\x1b[0m\n');
