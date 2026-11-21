@@ -2,6 +2,17 @@
 
 本项目遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [未发布] - 2026-11-21
+
+### Claude Code 独立审计 · 加固
+- **修复对话通道丢元数据**：`AIClient.chat` 此前只按字段白名单抄字段，把 `ev` 证据链 / `supersedes` 版本 / `conflictsWith` 冲突 / `domain` 领域标签全丢，导致「粘贴能用、对话不能用」。改为复用 `normalizeDraft`，与粘贴通道行为一致，且保留「编造引用被丢弃」的防伪造能力。
+- **导入 JSON 白名单清洗**：`sanitizeImported` 递归剔除 `__proto__`/`constructor`/`prototype` 与超深嵌套，堵住理论上的原型污染面。
+- **模型中心 SSRF 收口**：`assertSafeEndpoint` 只允许 http/https，拒绝云元数据地址（169.254.169.254 等）与 link-local 段，保留本机 Ollama / 内网自建模型服务。
+- **VERIFY 真人软提示**：填「AI / 我 / 自己」等给 warns（不硬拦，真人校验无法完全自动化）。
+- **检索高亮特殊字符**：`markKw` 关键词按同一套规则转义后再匹配，`<script>` 这类词能正确高亮，仍防 XSS。
+- **外部反馈已落盘**：用户点头后，社区评估以 L2W + L5 两条合规写入本机 `data/db.json`（写前备份、幂等去重、带时间戳）；data/ 不进 git，属本机数据主权。
+- 测试 152 → **182 全过**（新增对话元数据一致性 + 四项加固回归）。
+
 ## [未发布] - 2026-11-20
 
 ### 安全修复
@@ -11,7 +22,7 @@
 
 ### 新增文档与草稿
 - `FRONTEND-MAP.md`：给接手 Agent 的前端参考地图（设计 token + DOM/JS 结构按行号索引 + 硬规则）。
-- `examples/external-feedback-draft.json`：社区外部评估的合规草稿（L2W + L5 两条，已过系统 `normalizeDraft`/`validate` 零错误）——按铁律仅起草，待用户点头才落盘，未写进 `data/db.json`。
+- `examples/external-feedback-draft.json`：社区外部评估的起草草稿（L2W + L5 两条，已过系统 `normalizeDraft`/`validate` 零错误）——作为「AI 起草」这一步的可追溯证据保留；用户已于 11-21 点头，两条记录合规落盘到本机 `data/db.json`。
 
 测试 143 → 152 项，全过。
 

@@ -1743,6 +1743,24 @@ function seed(){
   };
 }
 let DB;
+/* 导入清洗：递归剔除原型污染危险键。JSON.parse 不会产生 __proto__ setter，
+   但若导入文件里塞了这些自有键，后续 Object.assign 会成为污染面。
+   只保留普通数据：对象/数组递归、标量原样，危险键与函数一律丢弃。 */
+const UNSAFE_KEYS={__proto__:1,constructor:1,prototype:1};
+function sanitizeImported(v,depth){
+  if(depth>40) return null;                       // 防超深嵌套
+  if(Array.isArray(v)) return v.map(x=>sanitizeImported(x,depth+1));
+  if(v&&typeof v==='object'){
+    const out={};
+    Object.keys(v).forEach(k=>{
+      if(UNSAFE_KEYS[k]) return;
+      if(Object.prototype.propertyIsEnumerable.call(v,k)) out[k]=sanitizeImported(v[k],depth+1);
+    });
+    return out;
+  }
+  if(typeof v==='function'||typeof v==='symbol'||typeof v==='undefined') return null;
+  return v;
+}
 function normalizeDB(){
   MODULES.forEach(m=>{ if(!Array.isArray(DB[m.id])) DB[m.id]=[]; });
   if(!DB.meta) DB.meta={version:1,updated:new Date().toISOString()};
@@ -1991,7 +2009,13 @@ function validate(id,rec){
     if(!(rec.due||'').trim()) warns.push('没有到期日的判断永远不会到期');
   }
   if(id==='L2W' && !(rec.source||'').trim()) errors.push('L2-W 外部事实必须带来源（谁定的/出处在哪）');
-  if(id==='VERIFY' && !(rec.name||'').trim()) errors.push('外部验收人必须是具名真人，不能留空');
+  if(id==='VERIFY'){
+    const nm=(rec.name||'').trim();
+    if(!nm) errors.push('外部验收人必须是具名真人，不能留空');
+    // 软提示：真人校验本就无法完全自动化（可能是真人名叫「AI」），只提醒不硬拦
+    else if(/^(我|自己|本人|ai|助手|claude|gpt|模型|robot|bot)$/i.test(nm) || /ai助手|人工智能/.test(nm))
+      warns.push('验收人写「'+nm+'」看着像 AI 或你自己——外部验收人应是另一个真人');
+  }
   if(id==='L1'){
     const t=(rec.text||'').trim();
     // 一句 = 一个句末标点；顿号/分号并列多个维度 = 整体重写，退回只改一句
@@ -2609,10 +2633,13 @@ const AIClient = {
     if(timer) clearTimeout(timer);
     if(!r.ok) throw new Error('接口返回 HTTP '+r.status);
     let data; try{ data=await r.json(); }catch(e){ throw new Error('接口返回的不是 JSON'); }
-    const ops=(Array.isArray(data.ops)?data.ops:[]).filter(o=>o&&M[o.m]).map(o=>{
-      const rec={}; M[o.m].fields.forEach(f=>{ const v=o.rec&&o.rec[f.k]; if(v!=null) rec[f.k]=String(v).slice(0,2000); });
-      return {m:o.m,rec};
-    });
+    // 与粘贴通道共用 normalizeDraft：白名单字段之外，一并接纳经真实记录校验的
+    // ev 证据链 / supersedes 版本 / conflictsWith 冲突 / domain 领域标签。
+    // 修复审计发现17——此前对话通道只留 fields，导致"粘贴能用、对话不能用"。
+    let ops=[];
+    if(Array.isArray(data.ops)&&data.ops.length){
+      try{ ops=normalizeDraft({ops:data.ops},'来自模型').ops; }catch(e){ ops=[]; }
+    }
     const out={reply:String(data.reply||data.note||''),ops,notes:(data.notes||[]).map(String),
       tools:Array.isArray(data.tools)?data.tools.map(String):ops.map(o=>M[o.m].name)};
     if(data.memWrite&&MEM_BLOCKS.indexOf(data.memWrite.block)>=0)
@@ -3663,7 +3690,9 @@ function searchRecords(q, mod){
 function markKw(text, kws){
   let s=esc(text);
   kws.filter(Boolean).forEach(k=>{
-    try{ s=s.replace(new RegExp('('+k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'),'<mark>$1</mark>'); }catch(e){}
+    // 文本已 esc，关键词也要按同一套规则转义后才能匹配（如 <script> → &lt;script&gt;）
+    const safe=esc(k).replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+    try{ s=s.replace(new RegExp('('+safe+')','gi'),'<mark>$1</mark>'); }catch(e){}
   });
   return s;
 }
@@ -4493,7 +4522,7 @@ $('#importFile').addEventListener('change',e=>{
     let d; try{ d=JSON.parse(r.result); if(!d.meta) throw 0; }catch(err){ toast('文件格式不对，未改动本机数据'); return; }
     if(!confirm('导入会覆盖本机全部记录（共 '+MODULES.reduce((s,m)=>s+(Array.isArray(d[m.id])?d[m.id].length:0),0)+' 条）。\n当前数据会先自动备份，可回滚。确定导入？')) return;
     const stamp=backupCurrent('导入前自动备份');
-    DB=d; MODULES.forEach(m=>{if(!Array.isArray(DB[m.id]))DB[m.id]=[];});
+    DB=sanitizeImported(d,0); MODULES.forEach(m=>{if(!Array.isArray(DB[m.id]))DB[m.id]=[];});
     normalizeDB(); CHAT=Array.isArray(DB.chat)?DB.chat.slice():[]; FILLING=DB.filling||null;
     save(); renderAll(); renderChat();
     toast('导入成功'+(stamp?' · 旧数据已备份':''));

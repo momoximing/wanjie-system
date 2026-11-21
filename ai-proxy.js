@@ -235,9 +235,34 @@ function headersFor(cfg) {
   if (cfg.key) h['Authorization'] = 'Bearer ' + cfg.key;
   return h;
 }
+/* SSRF 收口：模型中心可填任意 base，服务端会代发请求。
+   只允许 http/https，拒绝云元数据地址——本机 Ollama/LM Studio 与内网自建
+   模型服务属于合法场景，保留；真正的跳板目标是 169.254.169.254 等元数据端点。
+   注意：这只挡"明显危险目标"，不是完整 SSRF 防护；服务默认只绑回环是更硬的边界。 */
+function assertSafeEndpoint(u) {
+  let url;
+  try { url = new URL(u); }
+  catch (e) { throw new Error('模型地址不是合法 URL'); }
+  const proto = String(url.protocol || '').toLowerCase();
+  if (proto !== 'http:' && proto !== 'https:') throw new Error('模型地址只支持 http/https');
+  const host = String(url.hostname || '').toLowerCase().replace(/^\[|\]$/g, '');
+  const META_HOSTS = [
+    '169.254.169.254',            // AWS/GCP/Azure 通用元数据
+    '100.100.100.200',            // 阿里云元数据
+    'metadata.google.internal',
+    'metadata.goog',
+    'instance-data',
+    'fd00:ec2::254'               // AWS IMDS IPv6
+  ];
+  if (META_HOSTS.indexOf(host) >= 0) throw new Error('模型地址指向云元数据服务，已拒绝');
+  // 169.254.0.0/16 link-local 整段（元数据常在此段）一律拒绝
+  if (/^169\.254\./.test(host)) throw new Error('模型地址指向链路本地地址，已拒绝');
+  return u;
+}
 function callUrl(cfg) {
   const b = normalBase(cfg.base, cfg.protocol);
-  return cfg.protocol === 'anthropic' ? b + '/messages' : b + '/chat/completions';
+  const u = cfg.protocol === 'anthropic' ? b + '/messages' : b + '/chat/completions';
+  return assertSafeEndpoint(u);
 }
 async function callModel(cfg, messages, tools) {
   let body;

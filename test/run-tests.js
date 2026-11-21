@@ -189,17 +189,21 @@ async function testHardening() {
 }
 
 function testFeedbackDraft(html) {
-  section('外部反馈草稿 · 合规且未落库');
+  section('外部反馈 · 起草证据保留 + 已按规矩点头落盘');
   const p = path.join(ROOT, 'examples', 'external-feedback-draft.json');
-  ok('草稿文件存在', fs.existsSync(p));
+  ok('起草草稿文件保留', fs.existsSync(p));
   if (!fs.existsSync(p)) return;
   const draft = JSON.parse(fs.readFileSync(p, 'utf8'));
-  // 草稿就是草稿：带 note 说明待确认，绝不声称已写入
-  ok('草稿标注待确认', /起草|待你确认|未写入/.test(JSON.stringify(draft)));
+  // 草稿仍标注起草口吻，作为"AI 起草"这一步的可追溯证据
+  ok('草稿标注起草口吻', /起草|待你确认|未写入/.test(JSON.stringify(draft)));
   ok('草稿 ops 非空', Array.isArray(draft.ops) && draft.ops.length > 0);
-  // 草稿只放示例目录，不进真实数据卷
+  // 用户已点头：两条反馈应合规落盘到真实数据卷（data/ 不进 git，属本机数据主权）
   const db = JSON.parse(fs.readFileSync(path.join(ROOT, 'data', 'db.json'), 'utf8'));
-  ok('反馈未静默写进 db.json', JSON.stringify(db).indexOf('肖钰童') < 0);
+  ok('L2W 外部评估已落盘', (db.L2W||[]).some(r => /社区.*外部评估|肖钰童/.test(JSON.stringify(r))));
+  ok('L5 安全洞记录已落盘', (db.L5||[]).some(r => /本机服务默认对同网络开放|伪造 Host/.test(JSON.stringify(r))));
+  ok('落盘有时间戳 meta', !!db.meta && !!db.meta.feedbackCommitted);
+  // data/ 属于本机数据，不应被 git 跟踪
+  ok('data/ 未纳入 git（数据主权）', !require('child_process').execSync('git ls-files data/', {cwd:ROOT}).toString().trim());
 }
 
 function testNetworkBoundary() {
@@ -259,6 +263,51 @@ function testAgentCore(html) {
     T.newSession();
     ok('新建会话后计数为 2', T.getDB().sessions.length===2);
   }catch(e){ ok('Agent 骨架逻辑加载',false,e.message); }
+}
+
+function testChatMetadataParity(html) {
+  section('对话通道元数据 · 修复审计发现17（对话/粘贴行为一致）');
+  // 静态：chat 必须把 data.ops 交给 normalizeDraft，不能只用 fields 白名单手写
+  const s = html.indexOf('async chat(');
+  const e = html.indexOf('async parse(', s);
+  const chatSrc = (s >= 0 && e > s) ? html.slice(s, e) : '';
+  ok('chat 源码可提取', !!chatSrc);
+  ok('chat 复用 normalizeDraft 处理 ops', /normalizeDraft\(\{ops:data\.ops\}/.test(chatSrc));
+  ok('chat 不再手写 fields 白名单丢元数据', !/M\[o\.m\]\.fields\.forEach/.test(chatSrc));
+
+  // 动态：normalizeDraft 必须保留 ev/supersedes/conflictsWith/domain（真实源码）
+  const a = html.indexOf('const MODULES = [');
+  const b = html.indexOf('const PLAIN=');
+  const msrc = html.slice(a, b);
+  const recKeySrc = html.slice(html.indexOf('function recKey('), html.indexOf('function evOf('));
+  const normSrc = html.slice(html.indexOf('function normalizeDraft('), html.indexOf('/* 零配置通道'));
+  const sb = {
+    DB:{
+      L0:[{date:'2026-11-01',reason:'因睡眠不足'}],
+      L3B:[{claim:'旧判断原文',due:'2027-01-01',metric:'x',opponent:'y'}]
+    },
+    Date, Math, JSON, console, String, Array, Object
+  };
+  try {
+    vm.createContext(sb);
+    vm.runInContext(msrc + recKeySrc + normSrc + '\n;globalThis.N=normalizeDraft;', sb);
+    const out = sb.N({ops:[{m:'L3B',rec:{
+      claim:'新判断', due:'2027-06-01', metric:'z', opponent:'老张',
+      ev:[{m:'L0',k:'2026-11-01'}],
+      supersedes:[{m:'L3B',k:'2027-01-01'}],
+      conflictsWith:[{m:'L0',k:'2026-11-01'}],
+      domain:['工作']
+    }}]},'来自模型');
+    const rec = out.ops[0].rec;
+    ok('元数据·ev 保留且指向真实记录', Array.isArray(rec.ev) && rec.ev[0].k === '2026-11-01');
+    ok('元数据·supersedes 保留', Array.isArray(rec.supersedes) && rec.supersedes.length === 1);
+    ok('元数据·conflictsWith 保留', Array.isArray(rec.conflictsWith) && rec.conflictsWith.length === 1);
+    ok('元数据·domain 保留', Array.isArray(rec.domain) && rec.domain[0] === '工作');
+    // 编造的引用必须被丢弃（防模型乱写，不能因为修元数据而放宽）
+    const bad = sb.N({ops:[{m:'L3B',rec:{claim:'x',due:'d',metric:'m',opponent:'o',
+      ev:[{m:'L0',k:'不存在的主键'}]}}]},'x').ops[0].rec;
+    ok('元数据·编造的 ev 被丢弃', !bad.ev);
+  } catch (err) { ok('chat 元数据沙箱加载', false, err.message); }
 }
 
 function testArchiveRecall() {
@@ -482,11 +531,92 @@ function testValidateRules(html) {
   ok('VERIFY 具名放行', errs('VERIFY', {name:'老张'}) === '');
 }
 
+function testAuditHardening(html) {
+  section('审计加固 · 发现9/18/19 前端 + 发现10 服务端');
+
+  // ---- 发现9：sanitizeImported 剔除危险键 ----
+  const s9 = html.indexOf('const UNSAFE_KEYS=');
+  const e9 = html.indexOf('function normalizeDB(');
+  if (s9 < 0 || e9 < 0) { ok('sanitizeImported 源码可提取', false); }
+  else {
+    const sb = { Object, Array, String, Math, JSON, Date, console };
+    try {
+      vm.createContext(sb);
+      vm.runInContext(html.slice(s9, e9) + '\n;globalThis.S=sanitizeImported;', sb);
+      const dirty = JSON.parse('{"meta":{},"L0":[{"reason":"ok","__proto__":{"polluted":1}}],"constructor":{"x":1},"prototype":{"y":2},"nested":{"constructor":{"z":3},"keep":7}}');
+      const clean = sb.S(dirty, 0);
+      const own = (o,k) => Object.prototype.hasOwnProperty.call(o,k); // in 会查原型链，必须用 hasOwnProperty
+      ok('净化·剔除 __proto__', !own(clean.L0[0],'__proto__') && clean.L0[0].polluted === undefined);
+      ok('净化·剔除 constructor/prototype', !own(clean,'constructor') && !own(clean,'prototype'));
+      ok('净化·递归剔除嵌套危险键', !own(clean.nested,'constructor') && clean.nested.keep === 7);
+      ok('净化·原型未被污染', ({}.polluted === undefined));
+    } catch (err) { ok('sanitizeImported 沙箱加载', false, err.message); }
+  }
+
+  // ---- 发现19：markKw 特殊字符高亮 + 仍防 XSS ----
+  const escLine = html.indexOf('const esc=');
+  const markStart = html.indexOf('function markKw(');
+  const markEnd = html.indexOf('function renderSearch(');
+  if (markStart < 0 || markEnd < 0 || escLine < 0) { ok('markKw 源码可提取', false); }
+  else {
+    const sb = { String, RegExp, console };
+    try {
+      vm.createContext(sb);
+      vm.runInContext(html.slice(escLine, html.indexOf('\n', escLine)) + '\n' + html.slice(markStart, markEnd) + '\n;globalThis.MK=markKw;', sb);
+      const hl = sb.MK('用 <script> 标签', ['<script>']);
+      ok('高亮·特殊字符词命中', hl.indexOf('<mark>') >= 0 && hl.indexOf('&lt;script&gt;') >= 0);
+      ok('高亮·不引入裸标签（防 XSS）', hl.indexOf('<script>') < 0);
+      const plain = sb.MK('普通文本', ['不存在']);
+      ok('高亮·无匹配原样返回', plain.indexOf('<mark>') < 0);
+    } catch (err) { ok('markKw 沙箱加载', false, err.message); }
+  }
+
+  // ---- 发现18：VERIFY 软提示（复用 validate）----
+  {
+    const s = html.indexOf('function validate(id,rec){');
+    const e = html.indexOf('const GAPS', s);
+    const sb = { count:()=>0, Date, Math, JSON, console };
+    try {
+      vm.createContext(sb);
+      vm.runInContext(html.slice(s, e) + '\n;globalThis.V=validate;', sb);
+      const V = sb.V;
+      ok('VERIFY·空姓名仍硬拦', /真人|留空/.test(V('VERIFY', {}).errors.join(' ')));
+      ok('VERIFY·填「AI」给软提示', /像 AI|真人/.test(V('VERIFY', {name:'AI'}).warns.join(' ')));
+      ok('VERIFY·真人姓名不误报', V('VERIFY', {name:'张伟'}).warns.length === 0);
+    } catch (err) { ok('VERIFY 校验沙箱加载', false, err.message); }
+  }
+
+  // ---- 发现10：assertSafeEndpoint（服务端源码）----
+  const proxy = fs.readFileSync(path.join(ROOT, 'ai-proxy.js'), 'utf8');
+  const s10 = proxy.indexOf('function assertSafeEndpoint(');
+  const e10 = proxy.indexOf('function callUrl(', s10);
+  if (s10 < 0 || e10 < 0) { ok('assertSafeEndpoint 源码可提取', false); }
+  else {
+    const sb = { URL, console, Error, String };
+    try {
+      vm.createContext(sb);
+      vm.runInContext(proxy.slice(s10, e10) + '\n;globalThis.A=assertSafeEndpoint;', sb);
+      const safe = u => { try { sb.A(u); return true; } catch (e) { return false; } };
+      ok('SSRF·云端模型地址放行', safe('https://api.deepseek.com/v1/chat/completions'));
+      ok('SSRF·本机 Ollama 放行', safe('http://127.0.0.1:11434/v1/chat/completions'));
+      ok('SSRF·内网自建放行', safe('http://192.168.1.50:8000/v1/chat/completions'));
+      ok('SSRF·AWS 元数据拒绝', !safe('http://169.254.169.254/latest/meta-data/'));
+      ok('SSRF·link-local 段拒绝', !safe('http://169.254.10.20/v1/chat'));
+      ok('SSRF·GCP 元数据域名拒绝', !safe('http://metadata.google.internal/v1'));
+      ok('SSRF·file:// 协议拒绝', !safe('file:///etc/passwd'));
+      ok('SSRF·非法 URL 拒绝', !safe('not a url'));
+    } catch (err) { ok('assertSafeEndpoint 沙箱加载', false, err.message); }
+  }
+  ok('callUrl 已接入 SSRF 校验', /return assertSafeEndpoint\(u\)/.test(proxy));
+}
+
 (async () => {
   console.log('\n\x1b[1m万界系统 · 自动化测试\x1b[0m');
   const html = await testSyntax();
   testStatic(html);
   testValidateRules(html);
+  testChatMetadataParity(html);
+  testAuditHardening(html);
   testAgentCore(html);
   testArchiveRecall();
   testP1P2Features();
